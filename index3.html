@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jugando Aprendo - Plataforma Educativa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <style>
+    :root {
+      --pastel-purple: #DCD6F7;
+      --pastel-purple-dark: #A69CAC;
+      --pastel-blue: #A8DADC;
+      --pastel-pink: #F4ACB7;
+      --pastel-yellow: #FFE5EC;
+      --pastel-green: #B7E4C7;
+      --pastel-peach: #FFCAD4;
+      --bg: #F8F9FA;
+      --card-bg: #FFFFFF;
+      --text: #4A4E69;
+      --text-dark: #22223B;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
+      background-color: #F0E6EF;
+      background-image: radial-gradient(#DCD6F7 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 650px;
+      background: var(--card-bg);
+      border-radius: 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      padding: 28px;
+      position: relative;
+      border: 4px solid var(--pastel-purple);
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      background: #F2E9E4;
+      padding: 10px 18px;
+      border-radius: 20px;
+    }
+
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      color: var(--text-dark);
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .screen.active { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .app-title-main {
+      font-family: 'Fredoka One', cursive;
+      color: #9A8C98;
+      font-size: 2.2rem;
+      margin-bottom: 4px;
+    }
+
+    .school-badge {
+      font-size: 1rem;
+      color: #7209B7;
+      font-weight: 700;
+      margin-bottom: 18px;
+      background: var(--pastel-purple);
+      padding: 6px 18px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+
+    h2 {
+      font-family: 'Fredoka One', cursive;
+      color: var(--text-dark);
+      font-size: 1.3rem;
+      margin-bottom: 12px;
+    }
+
+    p { font-size: 0.95rem; color: #6C757D; margin-bottom: 15px; line-height: 1.4; }
+
+    .btn {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1rem;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 6px;
+      color: var(--text-dark);
+    }
+
+    .btn:hover { transform: translateY(-2px); opacity: 0.95; }
+    .btn:active { transform: translateY(1px); }
+    
+    .btn-purple { background-color: var(--pastel-purple); }
+    .btn-pink { background-color: var(--pastel-pink); }
+    .btn-green { background-color: var(--pastel-green); }
+    .btn-blue { background-color: var(--pastel-blue); }
+    .btn-outline { background: white; border: 2px solid #D8D2E1; color: var(--text); }
+
+    .input-field, select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      border: 2px solid #E2D9F3;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 12px;
+      outline: none;
+      background: #FAFAFA;
+      color: var(--text-dark);
+    }
+
+    .input-field:focus, select:focus { border-color: var(--pastel-purple-dark); background: white; }
+
+    .avatar-picker {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .avatar-option {
+      background: #FAFAFA;
+      border: 2px solid #E2D9F3;
+      border-radius: 18px;
+      padding: 8px;
+      cursor: pointer;
+      font-size: 2rem;
+      transition: all 0.2s ease;
+    }
+
+    .avatar-option.selected {
+      border-color: #9A8C98;
+      background: var(--pastel-purple);
+      transform: scale(1.05);
+    }
+
+    .subjects-menu {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .subject-card {
+      background: #FAFAFA;
+      border: 2px solid #E2D9F3;
+      border-radius: 20px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .subject-card:hover {
+      border-color: var(--pastel-purple-dark);
+      background: var(--pastel-yellow);
+      transform: translateY(-2px);
+    }
+
+    .subject-card .icon { font-size: 2.2rem; margin-bottom: 6px; }
+    .subject-card span { font-weight: 700; font-size: 0.95rem; color: var(--text-dark); }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 10px;
+      background: #E9ECEF;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--pastel-blue);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
+    .question-box {
+      background: #F8F9FA;
+      border: 2px solid #E9ECEF;
+      padding: 18px;
+      border-radius: 20px;
+      width: 100%;
+      margin-bottom: 15px;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    .btn-option {
+      background: white;
+      border: 2px solid #E2D9F3;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: 'Quicksand', sans-serif;
+      cursor: pointer;
+      color: var(--text-dark);
+      transition: all 0.2s ease;
+    }
+
+    .btn-option.correct { background: var(--pastel-green) !important; border-color: #52B788 !important; }
+    .btn-option.wrong { background: var(--pastel-pink) !important; border-color: #E63946 !important; }
+
+    .teacher-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+      font-size: 0.85rem;
+    }
+
+    .teacher-table th, .teacher-table td {
+      border: 1px solid #E9ECEF;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .teacher-table th { background: var(--pastel-purple); color: var(--text-dark); }
+
+    .certificate-card {
+      background: #FFFDF9;
+      border: 4px double #C8B6E2;
+      border-radius: 20px;
+      padding: 22px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .authors-footer {
+      margin-top: 20px;
+      padding-top: 12px;
+      border-top: 2px dashed #E2D9F3;
+      font-size: 0.85rem;
+      color: #8D99AE;
+      text-align: center;
+      width: 100%;
+    }
+
+    .authors-names {
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .app-container { border: none; box-shadow: none; width: 100%; max-width: 100%; }
+      .header-bar, .btn, .subjects-menu, .authors-footer { display: none !important; }
+      .certificate-card { border: 4px solid #C8B6E2; padding: 40px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <div class="header-bar">
+      <div class="stat-badge">❤️ <span id="lives-count">3</span></div>
+      <div class="stat-badge">⭐ <span id="stars-count">0</span></div>
+      <div class="stat-badge">🏆 <span id="score-count">0</span></div>
+    </div>
+
+    <!-- PORTADA / PERFIL OBLIGATORIO -->
+    <div id="screen-profile" class="screen active">
+      <h1 class="app-title-main">🎓 Jugando Aprendo</h1>
+      <div class="school-badge" id="display-colegio">E.B.E. "Ángel Emiro Bravo"</div>
+      <p>Ingresa tus datos completos para comenzar las actividades:</p>
+      
+      <input type="text" id="input-nombre" class="input-field" placeholder="Nombre y Apellido (Obligatorio)">
+      
+      <select id="select-grado">
+        <option value="1">1.º Grado de Primaria</option>
+        <option value="2">2.º Grado de Primaria</option>
+        <option value="3">3.º Grado de Primaria</option>
+        <option value="4">4.º Grado de Primaria</option>
+        <option value="5">5.º Grado de Primaria</option>
+        <option value="6">6.º Grado de Primaria</option>
+      </select>
+
+      <div class="avatar-picker">
+        <div class="avatar-option selected" onclick="selectAvatar('🚀', this)">🚀</div>
+        <div class="avatar-option" onclick="selectAvatar('🦖', this)">🦖</div>
+        <div class="avatar-option" onclick="selectAvatar('👑', this)">👑</div>
+        <div class="avatar-option" onclick="selectAvatar('🦉', this)">🦉</div>
+        <div class="avatar-option" onclick="selectAvatar('🤖', this)">🤖</div>
+        <div class="avatar-option" onclick="selectAvatar('🦄', this)">🦄</div>
+      </div>
+
+      <button class="btn btn-purple" onclick="saveProfile()">¡Ingresar a Estudiar! ✏️</button>
+      <br>
+      <button class="btn btn-outline" style="font-size:0.85rem;" onclick="accesoProfesora()">👩‍🏫 Panel de la Profesora</button>
+    </div>
+
+    <!-- MENÚ DE MATERIAS PARA EL ALUMNO -->
+    <div id="screen-welcome" class="screen">
+      <div style="font-size:3rem; background:var(--pastel-purple); border-radius:50%; width:70px; height:70px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px auto;" id="user-avatar-display">🚀</div>
+      <h2 id="welcome-player-name">¡Hola!</h2>
+      <p id="welcome-grade-text">Selecciona la materia que evaluarás hoy:</p>
+      
+      <div class="subjects-menu" id="subjects-container">
+        <!-- Las materias se generan automáticamente según el grado -->
+      </div>
+
+      <button class="btn btn-blue" onclick="openCertificate()">📜 Ver Mi Diploma</button>
+    </div>
+
+    <!-- PANTALLA DE JUEGO / PREGUNTAS -->
+    <div id="screen-game" class="screen">
+      <div style="font-family:'Fredoka One'; color:var(--text-dark); margin-bottom:5px;" id="round-indicator">Pregunta 1 de 3</div>
+      <div class="progress-bar-container"><div class="progress-bar" id="game-progress"></div></div>
+      
+      <div class="question-box" id="question-text">
+        Cargando pregunta...
+      </div>
+
+      <div class="options-grid" id="options-container"></div>
+      <button class="btn btn-outline" onclick="exitToMenu()">🏠 Menú de Materias</button>
+    </div>
+
+    <!-- DIPLOMA OFICIAL -->
+    <div id="screen-certificate" class="screen">
+      <div class="certificate-card">
+        <div style="font-size:2.5rem; margin-bottom:5px;">🎖️</div>
+        <h2 style="color:var(--text-dark); font-size:1.4rem; margin-bottom:2px;">DIPLOMA DE EXCELENCIA</h2>
+        <p id="cert-colegio" style="font-weight:bold; color:#7209B7; font-size:0.9rem; margin-bottom:8px;">Colegio Andrés Bello</p>
+        <p style="font-size:0.85rem; margin-bottom:4px;">Otorgado orgullosamente al estudiante:</p>
+        <h3 id="cert-student-name" style="color:var(--text-dark); font-size:1.5rem; text-decoration:underline; margin-bottom:8px;">Nombre Alumno</h3>
+        <p style="font-size:0.85rem;" id="cert-details">Por completar exitosamente las evaluaciones del programa Jugando Aprendo.</p>
+        <p style="font-size:0.75rem; color:#8D99AE; margin-top:12px;">⭐ ¡Excelente esfuerzo y superación escolar! ⭐</p>
+      </div>
+
+      <button class="btn btn-green" onclick="window.print()">🖨️ Imprimir Diploma</button>
+      <button class="btn btn-outline" onclick="exitToMenu()">⬅️ Volver</button>
+    </div>
+
+    <!-- PANEL DE LA PROFESORA EXCLUSIVO POR GRADO -->
+    <div id="screen-teacher" class="screen">
+      <h2>👩‍🏫 Registro de Evaluación por Grado</h2>
+      <p>Selecciona tu salón para revisar a tus estudiantes:</p>
+
+      <div style="width: 100%; max-width: 300px; margin-bottom: 15px;">
+        <label for="teacher-grade-select" style="font-weight: 700; font-size: 0.9rem;">Grado Docente:</label>
+        <select id="teacher-grade-select" onchange="cargarTablaProfesora()">
+          <option value="1">1.º Grado de Primaria</option>
+          <option value="2">2.º Grado de Primaria</option>
+          <option value="3">3.º Grado de Primaria</option>
+          <option value="4">4.º Grado de Primaria</option>
+          <option value="5">5.º Grado de Primaria</option>
+          <option value="6">6.º Grado de Primaria</option>
+        </select>
+      </div>
+
+      <div style="width: 100%; overflow-x: auto;">
+        <table class="teacher-table">
+          <thead>
+            <tr>
+              <th>Alumno</th>
+              <th>Materia</th>
+              <th>Aciertos</th>
+              <th>Fallos</th>
+            </tr>
+          </thead>
+          <tbody id="teacher-table-body">
+            <!-- Carga de datos filtrados por grado -->
+          </tbody>
+        </table>
+      </div>
+
+      <button class="btn btn-pink" onclick="limpiarRegistros()">🗑️ Limpiar Historial del Salón</button>
+      <button class="btn btn-outline" onclick="goToScreen('screen-profile')">⬅️ Volver al Inicio</button>
+    </div>
+
+    <!-- RESULTADOS DE LA EVALUACIÓN -->
+    <div id="screen-result" class="screen">
+      <div style="font-size: 3rem;" id="result-emoji">🎉</div>
+      <h2 id="result-title">¡Evaluación Completada!</h2>
+      <p id="result-desc">Tus resultados han sido registrados para la profesora.</p>
+      <button class="btn btn-purple" onclick="exitToMenu()">🏠 Continuar</button>
+    </div>
+
+    <!-- AUTORES DE LA APLICACIÓN -->
+    <div class="authors-footer">
+      Diseñado y Desarrollado por: <span class="authors-names">Dariangel,Darling,Doiraly,Dugleidys</span>
+    </div>
+
+  </div>
+
+  <script>
+    const NOMBRE_COLEGIO = "E.B.E. "Ángel Emiro Bravo"";
+    document.getElementById('display-colegio').innerText = NOMBRE_COLEGIO;
+
+    let studentsDB = JSON.parse(localStorage.getItem('jugando_aprendo_db')) || [];
+
+    let currentStudent = {
+      name: "",
+      grade: "1",
+      avatar: "🚀",
+      score: 0,
+      stars: 0,
+      correct: 0,
+      wrong: 0,
+      lives: 3,
+      currentSubject: ""
+    };
+
+    function selectAvatar(emoji, el) {
+      currentStudent.avatar = emoji;
+      document.querySelectorAll('.avatar-option').forEach(a => a.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function saveProfile() {
+      const nameInput = document.getElementById('input-nombre').value.trim();
+      const gradoSelect = document.getElementById('select-grado').value;
+
+      // Validación obligatoria: Debe tener Nombre y Apellido
+      const palabrasNombre = nameInput.split(" ").filter(p => p.length > 0);
+      if(palabrasNombre.length < 2) {
+        alert("¡Atención! Es obligatorio escribir tu Nombre y tu Apellido para ingresar.");
+        return;
+      }
+
+      currentStudent.name = nameInput;
+      currentStudent.grade = gradoSelect;
+      currentStudent.score = 0;
+      currentStudent.stars = 0;
+      currentStudent.correct = 0;
+      currentStudent.wrong = 0;
+      currentStudent.lives = 3;
+
+      document.getElementById('user-avatar-display').innerText = currentStudent.avatar;
+      document.getElementById('welcome-player-name').innerText = `¡Hola, ${currentStudent.name}!`;
+      document.getElementById('welcome-grade-text').innerText = `Alumno de ${currentStudent.grade}.º Grado de Primaria`;
+
+      renderSubjectsMenu();
+      updateHeader();
+      goToScreen('screen-welcome');
+    }
+
+    function renderSubjectsMenu() {
+      const container = document.getElementById('subjects-container');
+      
+      let html = `
+        <div class="subject-card" onclick="startSubject('Lenguaje')">
+          <div class="icon">📖</div>
+          <span>Lenguaje</span>
+        </div>
+        <div class="subject-card" onclick="startSubject('Matemáticas')">
+          <div class="icon">🔢</div>
+          <span>Matemáticas</span>
+        </div>
+        <div class="subject-card" onclick="startSubject('Deporte')">
+          <div class="icon">⚽</div>
+          <span>Deporte</span>
+        </div>
+        <div class="subject-card" onclick="startSubject('Proyecto')">
+          <div class="icon">🎨</div>
+          <span>Proyecto</span>
+        </div>
+      `;
+
+      // Si es 6.º Grado, se agrega la materia exclusiva de Inglés
+      if (currentStudent.grade === "6") {
+        html += `
+          <div class="subject-card" style="grid-column: span 2;" onclick="startSubject('Inglés')">
+            <div class="icon">🇬🇧</div>
+            <span>Inglés</span>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function updateHeader() {
+      document.getElementById('lives-count').innerText = currentStudent.lives;
+      document.getElementById('stars-count').innerText = currentStudent.stars;
+      document.getElementById('score-count').innerText = currentStudent.score;
+    }
+
+    function goToScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function exitToMenu() {
+      goToScreen('screen-welcome');
+      updateHeader();
+    }
+
+    // BANCO DE PREGUNTAS
+    const bancoMaterias = {
+      "Lenguaje": [
+        { q: "¿Cómo se escribe correctamente la palabra?", a: ["Zanahoria", "Sanahoria", "Canahoria", "Sanajoria"], c: 0 },
+        { q: "Completa la oración: 'El á__ol es muy alto'", a: ["rb", "rv", "rbo", "rvo"], c: 2 },
+        { q: "¿Cuál es el antónimo de 'Feliz'?", a: ["Contento", "Triste", "Alegre", "Rápido"], c: 1 }
+      ],
+      "Matemáticas": [
+        { q: "¿Cuánto es 7 + 8?", a: ["14", "15", "16", "13"], c: 1 },
+        { q: "¿Cuánto es 6 x 4?", a: ["20", "22", "24", "28"], c: 2 },
+        { q: "¿Cuál es el doble de 15?", a: ["30", "25", "35", "20"], c: 0 }
+      ],
+      "Deporte": [
+        { q: "¿Con qué parte del cuerpo está prohibido tocar la pelota en el fútbol (salvo el portero)?", a: ["Cabeza", "Pie", "Mano", "Rodilla"], c: 2 },
+        { q: "¿Cuántos jugadores hay en un equipo de béisbol en el campo?", a: ["9", "11", "5", "7"], c: 0 },
+        { q: "¿Qué beneficio nos da hacer ejercicio físico diariamente?", a: ["Cansancio malo", "Salud y energía", "Sueño", "Aburrimiento"], c: 1 }
+      ],
+      "Proyecto": [
+        { q: "¿Cuál es el primer paso para organizar un proyecto escolar?", a: ["Presentar al final", "Elegir el tema e investigar", "Descansar", "Pintar sin pensar"], c: 1 },
+        { q: "Para cuidar el planeta en nuestro proyecto reciclando, ¿dónde va el plástico?", a: ["Contenedor de plástico", "Al suelo", "En el río", "En la comida"], c: 0 },
+        { q: "¿Qué valor es fundamental al trabajar en equipo?", a: ["Pelear", "Compañerismo y respeto", "Egoísmo", "Desorden"], c: 1 }
+      ],
+      "Inglés": [
+        { q: "¿Cómo se dice en inglés la palabra 'Hola'?", a: ["Goodbye", "Hello", "Thank you", "Please"], c: 1 },
+        { q: "¿Cuál es la traducción en español del color 'Red'?", a: ["Verde", "Azul", "Rojo", "Amarillo"], c: 2 },
+        { q: "¿Cómo se dice en inglés el animal 'Perro'?", a: ["Cat", "Dog", "Bird", "Fish"], c: 1 }
+      ]
+    };
+
+    let currentQuestions = [];
+    let qIndex = 0;
+
+    function startSubject(materia) {
+      currentStudent.currentSubject = materia;
+      qIndex = 0;
+      currentQuestions = [...(bancoMaterias[materia] || bancoMaterias["Lenguaje"])];
+      goToScreen('screen-game');
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = currentQuestions[qIndex];
+      document.getElementById('round-indicator').innerText = `${currentStudent.currentSubject} - Pregunta ${qIndex + 1} de ${currentQuestions.length}`;
+      document.getElementById('game-progress').style.width = `${((qIndex) / currentQuestions.length) * 100}%`;
+      document.getElementById('question-text').innerText = q.q;
+
+      const opts = document.getElementById('options-container');
+      opts.innerHTML = '';
+
+      q.a.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-option';
+        btn.innerText = opt;
+        btn.onclick = () => {
+          if (idx === q.c) {
+            btn.classList.add('correct');
+            currentStudent.score += 100;
+            currentStudent.stars += 1;
+            currentStudent.correct++;
+            confetti({ particleCount: 25, spread: 40 });
+          } else {
+            btn.classList.add('wrong');
+            currentStudent.wrong++;
+          }
+          updateHeader();
+          setTimeout(nextQuestion, 1000);
+        };
+        opts.appendChild(btn);
+      });
+    }
+
+    function nextQuestion() {
+      qIndex++;
+      if (qIndex < currentQuestions.length) {
+        renderQuestion();
+      } else {
+        guardarProgresoProfesor();
+        goToScreen('screen-result');
+        confetti({ particleCount: 50 });
+      }
+    }
+
+    function guardarProgresoProfesor() {
+      let registro = {
+        name: currentStudent.name,
+        grade: currentStudent.grade,
+        subject: currentStudent.currentSubject,
+        correct: currentStudent.correct,
+        wrong: currentStudent.wrong
+      };
+      studentsDB.push(registro);
+      localStorage.setItem('jugando_aprendo_db', JSON.stringify(studentsDB));
+    }
+
+    function openCertificate() {
+      goToScreen('screen-certificate');
+      document.getElementById('cert-colegio').innerText = NOMBRE_COLEGIO;
+      document.getElementById('cert-student-name').innerText = currentStudent.name || "Estudiante";
+      document.getElementById('cert-details').innerText = `Por completar con éxito las evaluaciones correspondientes a ${currentStudent.grade}.º Grado de Primaria.`;
+    }
+
+    function accesoProfesora() {
+      const clave = prompt("Ingresa la clave de la profesora:");
+      if (clave === "2026" || clave === "1234") {
+        cargarTablaProfesora();
+        goToScreen('screen-teacher');
+      } else if (clave !== null) {
+        alert("Contraseña incorrecta.");
+      }
+    }
+
+    function cargarTablaProfesora() {
+      const tbody = document.getElementById('teacher-table-body');
+      const gradoSeleccionado = document.getElementById('teacher-grade-select').value;
+      tbody.innerHTML = "";
+
+      // Filtrar alumnos únicamente por el grado de la profesora
+      const alumnosFiltrados = studentsDB.filter(s => s.grade === gradoSeleccionado);
+
+      if (alumnosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4">No hay registros para ${gradoSeleccionado}.º Grado aún.</td></tr>`;
+        return;
+      }
+
+      alumnosFiltrados.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${s.name}</strong></td>
+          <td>${s.subject}</td>
+          <td style="color:#52B788; font-weight:bold;">${s.correct}</td>
+          <td style="color:#E63946; font-weight:bold;">${s.wrong}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function limpiarRegistros() {
+      const gradoSeleccionado = document.getElementById('teacher-grade-select').value;
+      if(confirm(`¿Deseas borrar el historial de ${gradoSeleccionado}.º Grado?`)) {
+        studentsDB = studentsDB.filter(s => s.grade !== gradoSeleccionado);
+        localStorage.setItem('jugando_aprendo_db', JSON.stringify(studentsDB));
+        cargarTablaProfesora();
+      }
+    }
+  </script>
+</body>
+</html>
