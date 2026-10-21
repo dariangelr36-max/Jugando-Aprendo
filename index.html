@@ -4,11 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jugando Aprendo - Plataforma Educativa</title>
+  
+  <!-- FUENTES Y CONFETI -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  
+
+  <!-- FIREBASE SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
   <style>
     :root {
       --pastel-purple: #DCD6F7;
@@ -42,7 +49,7 @@
 
     .app-container {
       width: 100%;
-      max-width: 650px;
+      max-width: 680px;
       background: var(--card-bg);
       border-radius: 28px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.06);
@@ -125,6 +132,7 @@
       gap: 8px;
       margin: 6px;
       color: var(--text-dark);
+      text-decoration: none;
     }
 
     .btn:hover { transform: translateY(-2px); opacity: 0.95; }
@@ -134,6 +142,7 @@
     .btn-pink { background-color: var(--pastel-pink); }
     .btn-green { background-color: var(--pastel-green); }
     .btn-blue { background-color: var(--pastel-blue); }
+    .btn-peach { background-color: var(--pastel-peach); }
     .btn-outline { background: white; border: 2px solid #D8D2E1; color: var(--text); }
 
     .input-field, select {
@@ -278,16 +287,6 @@
 
     .teacher-table th { background: var(--pastel-purple); color: var(--text-dark); }
 
-    .certificate-card {
-      background: #FFFDF9;
-      border: 4px double #C8B6E2;
-      border-radius: 20px;
-      padding: 22px;
-      width: 100%;
-      text-align: center;
-      margin-bottom: 15px;
-    }
-
     .authors-footer {
       margin-top: 20px;
       padding-top: 12px;
@@ -303,11 +302,20 @@
       color: var(--text-dark);
     }
 
+    .reading-card {
+      background: #FAFAFA;
+      border: 2px solid #E2D9F3;
+      border-radius: 16px;
+      padding: 15px;
+      margin-bottom: 10px;
+      width: 100%;
+      text-align: left;
+    }
+
     @media print {
       body { background: white; padding: 0; }
       .app-container { border: none; box-shadow: none; width: 100%; max-width: 100%; }
       .header-bar, .btn, .subjects-menu, .authors-footer { display: none !important; }
-      .certificate-card { border: 4px solid #C8B6E2; padding: 40px; }
     }
   </style>
 </head>
@@ -321,53 +329,73 @@
       <div class="stat-badge">🏆 <span id="score-count">0</span></div>
     </div>
 
-    <!-- PORTADA / PERFIL OBLIGATORIO -->
+    <!-- PANTALLA DE INICIO DE SESIÓN / REGISTRO ALUMNO -->
     <div id="screen-profile" class="screen active">
       <h1 class="app-title-main">🎓 Jugando Aprendo</h1>
       <div class="school-badge" id="display-colegio">E.B.E. "Ángel Emiro Bravo"</div>
-      <p>Ingresa tus datos completos para comenzar las actividades:</p>
+      <p>Ingresa con tu usuario registrado o crea uno nuevo:</p>
       
-      <input type="text" id="input-nombre" class="input-field" placeholder="Nombre y Apellido (Obligatorio)">
+      <input type="email" id="input-email" class="input-field" placeholder="Correo electrónico del alumno">
+      <input type="password" id="input-password" class="input-field" placeholder="Contraseña">
       
-      <select id="select-grado">
-        <option value="1">1.º Grado de Primaria</option>
-        <option value="2">2.º Grado de Primaria</option>
-        <option value="3">3.º Grado de Primaria</option>
-        <option value="4">4.º Grado de Primaria</option>
-        <option value="5">5.º Grado de Primaria</option>
-        <option value="6">6.º Grado de Primaria</option>
-      </select>
+      <div id="extra-register-fields" style="display: none; width: 100%;">
+        <input type="text" id="input-nombre" class="input-field" placeholder="Nombre y Apellido Completo">
+        
+        <select id="select-grado">
+          <option value="1">1.º Grado de Primaria</option>
+          <option value="2">2.º Grado de Primaria</option>
+          <option value="3">3.º Grado de Primaria</option>
+          <option value="4">4.º Grado de Primaria</option>
+          <option value="5">5.º Grado de Primaria</option>
+          <option value="6">6.º Grado de Primaria</option>
+        </select>
 
-      <div class="avatar-picker">
-        <div class="avatar-option selected" onclick="selectAvatar('🚀', this)">🚀</div>
-        <div class="avatar-option" onclick="selectAvatar('🦖', this)">🦖</div>
-        <div class="avatar-option" onclick="selectAvatar('👑', this)">👑</div>
-        <div class="avatar-option" onclick="selectAvatar('🦉', this)">🦉</div>
-        <div class="avatar-option" onclick="selectAvatar('🤖', this)">🤖</div>
-        <div class="avatar-option" onclick="selectAvatar('🦄', this)">🦄</div>
+        <div class="avatar-picker">
+          <div class="avatar-option selected" onclick="selectAvatar('🚀', this)">🚀</div>
+          <div class="avatar-option" onclick="selectAvatar('🦖', this)">🦖</div>
+          <div class="avatar-option" onclick="selectAvatar('👑', this)">👑</div>
+          <div class="avatar-option" onclick="selectAvatar('🦉', this)">🦉</div>
+          <div class="avatar-option" onclick="selectAvatar('🤖', this)">🤖</div>
+          <div class="avatar-option" onclick="selectAvatar('🦄', this)">🦄</div>
+        </div>
       </div>
 
-      <button class="btn btn-purple" onclick="saveProfile()">¡Ingresar a Estudiar! ✏️</button>
+      <button class="btn btn-purple" id="btn-main-auth" onclick="handleAuth()">¡Vamos a jugar! 🎮</button>
       <br>
-      <button class="btn btn-outline" style="font-size:0.85rem;" onclick="accesoProfesora()">👩‍🏫 Panel de la Profesora</button>
+      <button class="btn btn-outline" style="font-size:0.85rem;" onclick="toggleRegisterMode()" id="btn-toggle-reg">¿No tienes cuenta? Regístrate aquí</button>
+      <br>
+      <button class="btn btn-outline" style="font-size:0.85rem; margin-top:10px;" onclick="accesoProfesora()">👩‍🏫 Panel de la Profesora</button>
     </div>
 
-    <!-- MENÚ DE MATERIAS PARA EL ALUMNO -->
+    <!-- MENÚ PRINCIPAL DEL ALUMNO -->
     <div id="screen-welcome" class="screen">
       <div style="font-size:3rem; background:var(--pastel-purple); border-radius:50%; width:70px; height:70px; display:flex; align-items:center; justify-content:center; margin:0 auto 10px auto;" id="user-avatar-display">🚀</div>
       <h2 id="welcome-player-name">¡Hola!</h2>
-      <p id="welcome-grade-text">Selecciona la materia que evaluarás hoy:</p>
+      <p id="welcome-grade-text">Selecciona la actividad de hoy:</p>
       
-      <div class="subjects-menu" id="subjects-container">
-        <!-- Las materias se generan automáticamente según el grado -->
+      <div class="subjects-menu" id="subjects-container"></div>
+
+      <!-- BOTÓN DICCIONARIO / LEYENDO APRENDO -->
+      <a class="btn btn-peach" style="width: 100%; justify-content: center;" href="https://66d8a84bda320.site123.me/" target="_blank">📖 Abrir Leyendo Aprendo (Diccionario)</a>
+      <button class="btn btn-blue" style="width: 100%; justify-content: center;" onclick="openReadingsSection()">📚 Sección de Lectura</button>
+      <button class="btn btn-outline" style="font-size:0.85rem; margin-top:10px;" onclick="logout()">🚪 Cerrar Sesión</button>
+    </div>
+
+    <!-- SECCIÓN DE LECTURA -->
+    <div id="screen-readings" class="screen">
+      <h2>📚 Biblioteca y Lecturas</h2>
+      <p>Cuentos y lecturas recomendadas por tus profesoras:</p>
+      
+      <div id="readings-container" style="width: 100%;">
+        <!-- Lecturas dinámicas -->
       </div>
 
-      <button class="btn btn-blue" onclick="openCertificate()">📜 Ver Mi Diploma</button>
+      <button class="btn btn-outline" onclick="exitToMenu()">⬅️ Volver al Menú</button>
     </div>
 
     <!-- PANTALLA DE JUEGO / PREGUNTAS -->
     <div id="screen-game" class="screen">
-      <div style="font-family:'Fredoka One'; color:var(--text-dark); margin-bottom:5px;" id="round-indicator">Pregunta 1 de 3</div>
+      <div style="font-family:'Fredoka One'; color:var(--text-dark); margin-bottom:5px;" id="round-indicator">Pregunta 1</div>
       <div class="progress-bar-container"><div class="progress-bar" id="game-progress"></div></div>
       
       <div class="question-box" id="question-text">
@@ -375,32 +403,16 @@
       </div>
 
       <div class="options-grid" id="options-container"></div>
-      <button class="btn btn-outline" onclick="exitToMenu()">🏠 Menú de Materias</button>
+      <button class="btn btn-outline" onclick="exitToMenu()">🏠 Menú Principal</button>
     </div>
 
-    <!-- DIPLOMA OFICIAL -->
-    <div id="screen-certificate" class="screen">
-      <div class="certificate-card">
-        <div style="font-size:2.5rem; margin-bottom:5px;">🎖️</div>
-        <h2 style="color:var(--text-dark); font-size:1.4rem; margin-bottom:2px;">DIPLOMA DE EXCELENCIA</h2>
-        <p id="cert-colegio" style="font-weight:bold; color:#7209B7; font-size:0.9rem; margin-bottom:8px;">Colegio Andrés Bello</p>
-        <p style="font-size:0.85rem; margin-bottom:4px;">Otorgado orgullosamente al estudiante:</p>
-        <h3 id="cert-student-name" style="color:var(--text-dark); font-size:1.5rem; text-decoration:underline; margin-bottom:8px;">Nombre Alumno</h3>
-        <p style="font-size:0.85rem;" id="cert-details">Por completar exitosamente las evaluaciones del programa Jugando Aprendo.</p>
-        <p style="font-size:0.75rem; color:#8D99AE; margin-top:12px;">⭐ ¡Excelente esfuerzo y superación escolar! ⭐</p>
-      </div>
-
-      <button class="btn btn-green" onclick="window.print()">🖨️ Imprimir Diploma</button>
-      <button class="btn btn-outline" onclick="exitToMenu()">⬅️ Volver</button>
-    </div>
-
-    <!-- PANEL DE LA PROFESORA EXCLUSIVO POR GRADO -->
+    <!-- PANEL DE LA PROFESORA -->
     <div id="screen-teacher" class="screen">
-      <h2>👩‍🏫 Registro de Evaluación por Grado</h2>
-      <p>Selecciona tu salón para revisar a tus estudiantes:</p>
+      <h2>👩‍🏫 Panel Docente de Evaluación</h2>
+      <p>Gestiona los estudiantes y actividades de tu salón:</p>
 
-      <div style="width: 100%; max-width: 300px; margin-bottom: 15px;">
-        <label for="teacher-grade-select" style="font-weight: 700; font-size: 0.9rem;">Grado Docente:</label>
+      <div style="width: 100%; max-width: 320px; margin-bottom: 15px;">
+        <label for="teacher-grade-select" style="font-weight: 700; font-size: 0.9rem;">Seleccionar Grado Docente:</label>
         <select id="teacher-grade-select" onchange="cargarTablaProfesora()">
           <option value="1">1.º Grado de Primaria</option>
           <option value="2">2.º Grado de Primaria</option>
@@ -411,7 +423,7 @@
         </select>
       </div>
 
-      <div style="width: 100%; overflow-x: auto;">
+      <div style="width: 100%; overflow-x: auto; margin-bottom: 15px;">
         <table class="teacher-table">
           <thead>
             <tr>
@@ -422,16 +434,44 @@
             </tr>
           </thead>
           <tbody id="teacher-table-body">
-            <!-- Carga de datos filtrados por grado -->
+            <!-- Carga desde Firestore -->
           </tbody>
         </table>
       </div>
 
-      <button class="btn btn-pink" onclick="limpiarRegistros()">🗑️ Limpiar Historial del Salón</button>
-      <button class="btn btn-outline" onclick="goToScreen('screen-profile')">⬅️ Volver al Inicio</button>
+      <button class="btn btn-green" onclick="toggleActivityCreator()">➕ Crear Nueva Pregunta / Actividad</button>
+      <button class="btn btn-purple" onclick="toggleReadingCreator()">📖 Agregar Nueva Lectura</button>
+
+      <!-- CREADOR DE ACTIVIDADES -->
+      <div id="activity-creator-box" style="display:none; background:#F8F9FA; border:2px solid #E2D9F3; border-radius:18px; padding:15px; margin-top:15px; width:100%;">
+        <h3>Añadir Pregunta Personalizada</h3>
+        <input type="text" id="new-q-title" class="input-field" placeholder="Pregunta">
+        <input type="text" id="new-q-opt1" class="input-field" placeholder="Opción Correcta (A)">
+        <input type="text" id="new-q-opt2" class="input-field" placeholder="Opción Incorrecta (B)">
+        <input type="text" id="new-q-opt3" class="input-field" placeholder="Opción Incorrecta (C)">
+        <select id="new-q-subject">
+          <option value="Lenguaje">Lenguaje</option>
+          <option value="Matemáticas">Matemáticas</option>
+          <option value="Deporte">Deporte</option>
+          <option value="Proyecto">Proyecto</option>
+          <option value="Inglés">Inglés</option>
+        </select>
+        <button class="btn btn-purple" onclick="saveCustomActivity()">💾 Guardar Pregunta en la Nube</button>
+      </div>
+
+      <!-- CREADOR DE LECTURAS -->
+      <div id="reading-creator-box" style="display:none; background:#F8F9FA; border:2px solid #E2D9F3; border-radius:18px; padding:15px; margin-top:15px; width:100%;">
+        <h3>Añadir Lectura o Libro</h3>
+        <input type="text" id="new-reading-title" class="input-field" placeholder="Título del libro o lectura">
+        <textarea id="new-reading-content" class="input-field" placeholder="Escribe el texto de la lectura o pega el enlace al libro PDF" style="height: 100px;"></textarea>
+        <button class="btn btn-purple" onclick="saveCustomReading()">💾 Publicar Lectura</button>
+      </div>
+
+      <br>
+      <button class="btn btn-outline" onclick="goToScreen('screen-profile')">⬅️ Salir del Panel</button>
     </div>
 
-    <!-- RESULTADOS DE LA EVALUACIÓN -->
+    <!-- RESULTADOS -->
     <div id="screen-result" class="screen">
       <div style="font-size: 3rem;" id="result-emoji">🎉</div>
       <h2 id="result-title">¡Evaluación Completada!</h2>
@@ -439,7 +479,7 @@
       <button class="btn btn-purple" onclick="exitToMenu()">🏠 Continuar</button>
     </div>
 
-    <!-- AUTORES DE LA APLICACIÓN -->
+    <!-- FOOTER DE AUTORES -->
     <div class="authors-footer">
       Diseñado y Desarrollado por: <span class="authors-names">Dariangel, Darling, Doiraly, Dugleidys</span>
     </div>
@@ -447,10 +487,27 @@
   </div>
 
   <script>
+    // CREDENCIALES CONFIGURADAS
+    const firebaseConfig = {
+      apiKey: "AIzaSyDF9_momXI_EK7elDtqdg2J93WfqjU2GFE",
+      authDomain: "jugando-aprendo-befab.firebaseapp.com",
+      projectId: "jugando-aprendo-befab",
+      storageBucket: "jugando-aprendo-befab.firebasestorage.app",
+      messagingSenderId: "524794364493",
+      appId: "1:524794364493:web:e78730d9d5c46554375204",
+      measurementId: "G-PY8MRHMCPP"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
     const NOMBRE_COLEGIO = 'E.B.E. "Ángel Emiro Bravo"';
     document.getElementById('display-colegio').innerText = NOMBRE_COLEGIO;
 
-    let studentsDB = JSON.parse(localStorage.getItem('jugando_aprendo_db')) || [];
+    let isRegisterMode = false;
+    let currentUserData = null;
 
     let currentStudent = {
       name: "",
@@ -464,42 +521,91 @@
       currentSubject: ""
     };
 
+    // ESCUCHAR ESTADO DE SESIÓN
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        db.collection("users").doc(user.uid).get().then(doc => {
+          if (doc.exists) {
+            currentUserData = doc.data();
+            currentStudent.name = currentUserData.name;
+            currentStudent.grade = currentUserData.grade;
+            currentStudent.avatar = currentUserData.avatar || "🚀";
+            
+            document.getElementById('user-avatar-display').innerText = currentStudent.avatar;
+            document.getElementById('welcome-player-name').innerText = `¡Hola, ${currentStudent.name}!`;
+            document.getElementById('welcome-grade-text').innerText = `Alumno de ${currentStudent.grade}.º Grado`;
+            
+            renderSubjectsMenu();
+            updateHeader();
+            goToScreen('screen-welcome');
+          }
+        });
+      } else {
+        goToScreen('screen-profile');
+      }
+    });
+
+    function toggleRegisterMode() {
+      isRegisterMode = !isRegisterMode;
+      const extraFields = document.getElementById('extra-register-fields');
+      const btnAuth = document.getElementById('btn-main-auth');
+      const btnToggle = document.getElementById('btn-toggle-reg');
+
+      if (isRegisterMode) {
+        extraFields.style.display = 'block';
+        btnAuth.innerText = "¡Crear Cuenta y Jugar! ✏️";
+        btnToggle.innerText = "¿Ya tienes cuenta? Inicia Sesión";
+      } else {
+        extraFields.style.display = 'none';
+        btnAuth.innerText = "¡Vamos a jugar! 🎮";
+        btnToggle.innerText = "¿No tienes cuenta? Regístrate aquí";
+      }
+    }
+
     function selectAvatar(emoji, el) {
       currentStudent.avatar = emoji;
       document.querySelectorAll('.avatar-option').forEach(a => a.classList.remove('selected'));
       el.classList.add('selected');
     }
 
-    function saveProfile() {
-      const nameInput = document.getElementById('input-nombre').value.trim();
-      const gradoSelect = document.getElementById('select-grado').value;
+    function handleAuth() {
+      const email = document.getElementById('input-email').value.trim();
+      const password = document.getElementById('input-password').value.trim();
 
-      const palabrasNombre = nameInput.split(" ").filter(p => p.length > 0);
-      if(palabrasNombre.length < 2) {
-        alert("¡Atención! Es obligatorio escribir tu Nombre y tu Apellido para ingresar.");
+      if (!email || !password) {
+        alert("Por favor ingresa tu correo y contraseña.");
         return;
       }
 
-      currentStudent.name = nameInput;
-      currentStudent.grade = gradoSelect;
-      currentStudent.score = 0;
-      currentStudent.stars = 0;
-      currentStudent.correct = 0;
-      currentStudent.wrong = 0;
-      currentStudent.lives = 3;
+      if (isRegisterMode) {
+        const nameInput = document.getElementById('input-nombre').value.trim();
+        const gradoSelect = document.getElementById('select-grado').value;
 
-      document.getElementById('user-avatar-display').innerText = currentStudent.avatar;
-      document.getElementById('welcome-player-name').innerText = `¡Hola, ${currentStudent.name}!`;
-      document.getElementById('welcome-grade-text').innerText = `Alumno de ${currentStudent.grade}.º Grado de Primaria`;
+        if (nameInput.split(" ").filter(p => p.length > 0).length < 2) {
+          alert("Escribe tu Nombre y Apellido completo.");
+          return;
+        }
 
-      renderSubjectsMenu();
-      updateHeader();
-      goToScreen('screen-welcome');
+        auth.createUserWithEmailAndPassword(email, password).then(cred => {
+          return db.collection("users").doc(cred.user.uid).set({
+            name: nameInput,
+            grade: gradoSelect,
+            avatar: currentStudent.avatar,
+            role: "student"
+          });
+        }).catch(err => alert("Error al registrarse: " + err.message));
+
+      } else {
+        auth.signInWithEmailAndPassword(email, password).catch(err => alert("Error al iniciar sesión: " + err.message));
+      }
+    }
+
+    function logout() {
+      auth.signOut();
     }
 
     function renderSubjectsMenu() {
       const container = document.getElementById('subjects-container');
-      
       let html = `
         <div class="subject-card" onclick="startSubject('Lenguaje')">
           <div class="icon">📖</div>
@@ -527,7 +633,6 @@
           </div>
         `;
       }
-
       container.innerHTML = html;
     }
 
@@ -547,31 +652,15 @@
       updateHeader();
     }
 
+    // BANCO DE PREGUNTAS POR DEFECTO
     const bancoMaterias = {
       "Lenguaje": [
         { q: "¿Cómo se escribe correctamente la palabra?", a: ["Zanahoria", "Sanahoria", "Canahoria", "Sanajoria"], c: 0 },
-        { q: "Completa la oración: 'El á__ol es muy alto'", a: ["rb", "rv", "rbo", "rvo"], c: 2 },
-        { q: "¿Cuál es el antónimo de 'Feliz'?", a: ["Contento", "Triste", "Alegre", "Rápido"], c: 1 }
+        { q: "Completa la oración: 'El á__ol es muy alto'", a: ["rb", "rv", "rbo", "rvo"], c: 2 }
       ],
       "Matemáticas": [
         { q: "¿Cuánto es 7 + 8?", a: ["14", "15", "16", "13"], c: 1 },
-        { q: "¿Cuánto es 6 x 4?", a: ["20", "22", "24", "28"], c: 2 },
-        { q: "¿Cuál es el doble de 15?", a: ["30", "25", "35", "20"], c: 0 }
-      ],
-      "Deporte": [
-        { q: "¿Con qué parte del cuerpo está prohibido tocar la pelota en el fútbol (salvo el portero)?", a: ["Cabeza", "Pie", "Mano", "Rodilla"], c: 2 },
-        { q: "¿Cuántos jugadores hay en un equipo de béisbol en el campo?", a: ["9", "11", "5", "7"], c: 0 },
-        { q: "¿Qué beneficio nos da hacer ejercicio físico diariamente?", a: ["Cansancio malo", "Salud y energía", "Sueño", "Aburrimiento"], c: 1 }
-      ],
-      "Proyecto": [
-        { q: "¿Cuál es el primer paso para organizar un proyecto escolar?", a: ["Presentar al final", "Elegir el tema e investigar", "Descansar", "Pintar sin pensar"], c: 1 },
-        { q: "Para cuidar el planeta en nuestro proyecto reciclando, ¿dónde va el plástico?", a: ["Contenedor de plástico", "Al suelo", "En el río", "En la comida"], c: 0 },
-        { q: "¿Qué valor es fundamental al trabajar en equipo?", a: ["Pelear", "Compañerismo y respeto", "Egoísmo", "Desorden"], c: 1 }
-      ],
-      "Inglés": [
-        { q: "¿Cómo se dice en inglés la palabra 'Hola'?", a: ["Goodbye", "Hello", "Thank you", "Please"], c: 1 },
-        { q: "¿Cuál es la traducción en español del color 'Red'?", a: ["Verde", "Azul", "Rojo", "Amarillo"], c: 2 },
-        { q: "¿Cómo se dice en inglés el animal 'Perro'?", a: ["Cat", "Dog", "Bird", "Fish"], c: 1 }
+        { q: "¿Cuánto es 6 x 4?", a: ["20", "22", "24", "28"], c: 2 }
       ]
     };
 
@@ -581,9 +670,18 @@
     function startSubject(materia) {
       currentStudent.currentSubject = materia;
       qIndex = 0;
-      currentQuestions = [...(bancoMaterias[materia] || bancoMaterias["Lenguaje"])];
-      goToScreen('screen-game');
-      renderQuestion();
+      
+      db.collection("custom_questions").where("subject", "==", materia).get().then(snapshot => {
+        let customQs = [];
+        snapshot.forEach(doc => {
+          let d = doc.data();
+          customQs.push({ q: d.q, a: d.a, c: 0 });
+        });
+
+        currentQuestions = customQs.length > 0 ? customQs : (bancoMaterias[materia] || bancoMaterias["Lenguaje"]);
+        goToScreen('screen-game');
+        renderQuestion();
+      });
     }
 
     function renderQuestion() {
@@ -629,22 +727,37 @@
     }
 
     function guardarProgresoProfesor() {
-      let registro = {
+      db.collection("evaluations").add({
         name: currentStudent.name,
         grade: currentStudent.grade,
         subject: currentStudent.currentSubject,
         correct: currentStudent.correct,
-        wrong: currentStudent.wrong
-      };
-      studentsDB.push(registro);
-      localStorage.setItem('jugando_aprendo_db', JSON.stringify(studentsDB));
+        wrong: currentStudent.wrong,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
     }
 
-    function openCertificate() {
-      goToScreen('screen-certificate');
-      document.getElementById('cert-colegio').innerText = NOMBRE_COLEGIO;
-      document.getElementById('cert-student-name').innerText = currentStudent.name || "Estudiante";
-      document.getElementById('cert-details').innerText = `Por completar con éxito las evaluaciones correspondientes a ${currentStudent.grade}.º Grado de Primaria.`;
+    function openReadingsSection() {
+      goToScreen('screen-readings');
+      const container = document.getElementById('readings-container');
+      container.innerHTML = "Cargando lecturas...";
+
+      db.collection("readings").get().then(snapshot => {
+        container.innerHTML = "";
+        if (snapshot.empty) {
+          container.innerHTML = "<p>No hay lecturas disponibles aún.</p>";
+          return;
+        }
+        snapshot.forEach(doc => {
+          let r = doc.data();
+          container.innerHTML += `
+            <div class="reading-card">
+              <h3>📖 ${r.title}</h3>
+              <p style="margin-top:8px; color:#22223B;">${r.content}</p>
+            </div>
+          `;
+        });
+      });
     }
 
     function accesoProfesora() {
@@ -660,34 +773,76 @@
     function cargarTablaProfesora() {
       const tbody = document.getElementById('teacher-table-body');
       const gradoSeleccionado = document.getElementById('teacher-grade-select').value;
-      tbody.innerHTML = "";
+      tbody.innerHTML = "Cargando...";
 
-      const alumnosFiltrados = studentsDB.filter(s => s.grade === gradoSeleccionado);
-
-      if (alumnosFiltrados.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4">No hay registros para ${gradoSeleccionado}.º Grado aún.</td></tr>`;
-        return;
-      }
-
-      alumnosFiltrados.forEach(s => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>${s.name}</strong></td>
-          <td>${s.subject}</td>
-          <td style="color:#52B788; font-weight:bold;">${s.correct}</td>
-          <td style="color:#E63946; font-weight:bold;">${s.wrong}</td>
-        `;
-        tbody.appendChild(tr);
+      db.collection("evaluations").where("grade", "==", gradoSeleccionado).get().then(snapshot => {
+        tbody.innerHTML = "";
+        if (snapshot.empty) {
+          tbody.innerHTML = `<tr><td colspan="4">No hay registros para ${gradoSeleccionado}.º Grado.</td></tr>`;
+          return;
+        }
+        snapshot.forEach(doc => {
+          let s = doc.data();
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${s.name}</strong></td>
+            <td>${s.subject}</td>
+            <td style="color:#52B788; font-weight:bold;">${s.correct}</td>
+            <td style="color:#E63946; font-weight:bold;">${s.wrong}</td>
+          `;
+          tbody.appendChild(tr);
+        });
       });
     }
 
-    function limpiarRegistros() {
-      const gradoSeleccionado = document.getElementById('teacher-grade-select').value;
-      if(confirm(`¿Deseas borrar el historial de ${gradoSeleccionado}.º Grado?`)) {
-        studentsDB = studentsDB.filter(s => s.grade !== gradoSeleccionado);
-        localStorage.setItem('jugando_aprendo_db', JSON.stringify(studentsDB));
-        cargarTablaProfesora();
+    function toggleActivityCreator() {
+      const box = document.getElementById('activity-creator-box');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleReadingCreator() {
+      const box = document.getElementById('reading-creator-box');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function saveCustomActivity() {
+      const q = document.getElementById('new-q-title').value.trim();
+      const opt1 = document.getElementById('new-q-opt1').value.trim();
+      const opt2 = document.getElementById('new-q-opt2').value.trim();
+      const opt3 = document.getElementById('new-q-opt3').value.trim();
+      const subj = document.getElementById('new-q-subject').value;
+
+      if (!q || !opt1 || !opt2 || !opt3) {
+        alert("Por favor completa todos los campos de la pregunta.");
+        return;
       }
+
+      db.collection("custom_questions").add({
+        q: q,
+        a: [opt1, opt2, opt3],
+        subject: subj
+      }).then(() => {
+        alert("¡Pregunta guardada en la nube con éxito!");
+        toggleActivityCreator();
+      });
+    }
+
+    function saveCustomReading() {
+      const title = document.getElementById('new-reading-title').value.trim();
+      const content = document.getElementById('new-reading-content').value.trim();
+
+      if (!title || !content) {
+        alert("Completa el título y contenido de la lectura.");
+        return;
+      }
+
+      db.collection("readings").add({
+        title: title,
+        content: content
+      }).then(() => {
+        alert("¡Lectura publicada para los alumnos!");
+        toggleReadingCreator();
+      });
     }
   </script>
 </body>
