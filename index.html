@@ -129,6 +129,7 @@
       transition: all 0.2s ease;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
       margin: 6px;
       color: var(--text-dark);
@@ -162,6 +163,24 @@
 
     .input-field:focus, select:focus { border-color: var(--pastel-purple-dark); background: white; }
 
+    .remember-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .remember-box input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--pastel-purple-dark);
+      cursor: pointer;
+    }
+
     .avatar-picker {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -178,6 +197,9 @@
       cursor: pointer;
       font-size: 2rem;
       transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .avatar-option.selected {
@@ -287,6 +309,29 @@
 
     .teacher-table th { background: var(--pastel-purple); color: var(--text-dark); }
 
+    .managed-item {
+      background: #FAFAFA;
+      border: 2px solid #E2D9F3;
+      border-radius: 14px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    .certificate-box {
+      background: #FFFDF9;
+      border: 4px double #C8B6E2;
+      border-radius: 20px;
+      padding: 22px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
     .authors-footer {
       margin-top: 20px;
       padding-top: 12px;
@@ -297,10 +342,7 @@
       width: 100%;
     }
 
-    .authors-names {
-      font-weight: 700;
-      color: var(--text-dark);
-    }
+    .authors-names { font-weight: 700; color: var(--text-dark); }
 
     .reading-card {
       background: #FAFAFA;
@@ -312,10 +354,33 @@
       text-align: left;
     }
 
+    .tab-switch {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 20px;
+      border: 2px solid #E2D9F3;
+      background: #FAFAFA;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: var(--pastel-purple);
+      border-color: var(--pastel-purple-dark);
+    }
+
     @media print {
       body { background: white; padding: 0; }
       .app-container { border: none; box-shadow: none; width: 100%; max-width: 100%; }
       .header-bar, .btn, .subjects-menu, .authors-footer { display: none !important; }
+      .certificate-box { border: 4px solid #C8B6E2; padding: 40px; }
     }
   </style>
 </head>
@@ -329,42 +394,67 @@
       <div class="stat-badge">🏆 <span id="score-count">0</span></div>
     </div>
 
-    <!-- PANTALLA DE INICIO DE SESIÓN / REGISTRO ALUMNO -->
+    <!-- PANTALLA DE INICIO DE SESIÓN / REGISTRO ALUMNO Y DOCENTE -->
     <div id="screen-profile" class="screen active">
       <h1 class="app-title-main">🎓 Jugando Aprendo</h1>
       <div class="school-badge" id="display-colegio">E.B.E. "Ángel Emiro Bravo"</div>
-      <p>Ingresa con tu usuario registrado o crea uno nuevo:</p>
       
-      <input type="email" id="input-email" class="input-field" placeholder="Correo electrónico del alumno">
-      <input type="password" id="input-password" class="input-field" placeholder="Contraseña">
-      
-      <div id="extra-register-fields" style="display: none; width: 100%;">
-        <input type="text" id="input-nombre" class="input-field" placeholder="Nombre y Apellido Completo">
-        
-        <select id="select-grado">
-          <option value="1">1.º Grado de Primaria</option>
-          <option value="2">2.º Grado de Primaria</option>
-          <option value="3">3.º Grado de Primaria</option>
-          <option value="4">4.º Grado de Primaria</option>
-          <option value="5">5.º Grado de Primaria</option>
-          <option value="6">6.º Grado de Primaria</option>
-        </select>
-
-        <div class="avatar-picker">
-          <div class="avatar-option selected" onclick="selectAvatar('🚀', this)">🚀</div>
-          <div class="avatar-option" onclick="selectAvatar('🦖', this)">🦖</div>
-          <div class="avatar-option" onclick="selectAvatar('👑', this)">👑</div>
-          <div class="avatar-option" onclick="selectAvatar('🦉', this)">🦉</div>
-          <div class="avatar-option" onclick="selectAvatar('🤖', this)">🤖</div>
-          <div class="avatar-option" onclick="selectAvatar('🦄', this)">🦄</div>
-        </div>
+      <div class="tab-switch">
+        <button class="tab-btn active" id="tab-student" onclick="switchUserRole('student')">👧 Alumnos</button>
+        <button class="tab-btn" id="tab-teacher" onclick="switchUserRole('teacher')">👩‍🏫 Profesoras</button>
       </div>
 
-      <button class="btn btn-purple" id="btn-main-auth" onclick="handleAuth()">¡Vamos a jugar! 🎮</button>
+      <p id="role-subtitle">Ingresa con tu cuenta de alumno:</p>
+
+      <form onsubmit="event.preventDefault(); handleAuth();" style="width: 100%;">
+        <input type="email" id="input-email" class="input-field" placeholder="Correo electrónico" autocomplete="username" required>
+        <input type="password" id="input-password" class="input-field" placeholder="Contraseña" autocomplete="current-password" required>
+        
+        <label class="remember-box">
+          <input type="checkbox" id="check-remember" checked>
+          <span>Recordar mi cuenta en este dispositivo</span>
+        </label>
+
+        <div id="extra-register-fields" style="display: none; width: 100%;">
+          <input type="text" id="input-nombre" class="input-field" placeholder="Nombre y Apellido Completo">
+          
+          <select id="select-grado">
+            <option value="1">1.º Grado de Primaria</option>
+            <option value="2">2.º Grado de Primaria</option>
+            <option value="3">3.º Grado de Primaria</option>
+            <option value="4">4.º Grado de Primaria</option>
+            <option value="5">5.º Grado de Primaria</option>
+            <option value="6">6.º Grado de Primaria</option>
+          </select>
+
+          <p style="font-size:0.85rem; font-weight:700; margin-bottom:6px;">Elige tu avatar preferido:</p>
+          <div class="avatar-picker">
+            <div class="avatar-option selected" onclick="selectAvatar('🚀', this)">🚀</div>
+            <div class="avatar-option" onclick="selectAvatar('🦖', this)">🦖</div>
+            <div class="avatar-option" onclick="selectAvatar('👑', this)">👑</div>
+            <div class="avatar-option" onclick="selectAvatar('🦉', this)">🦉</div>
+            <div class="avatar-option" onclick="selectAvatar('🤖', this)">🤖</div>
+            <div class="avatar-option" onclick="selectAvatar('🦄', this)">🦄</div>
+          </div>
+        </div>
+
+        <div id="extra-teacher-fields" style="display: none; width: 100%;">
+          <input type="text" id="input-teacher-nombre" class="input-field" placeholder="Nombre Completo del Docente">
+          <select id="select-teacher-grado">
+            <option value="1">Docente de 1.º Grado</option>
+            <option value="2">Docente de 2.º Grado</option>
+            <option value="3">Docente de 3.º Grado</option>
+            <option value="4">Docente de 4.º Grado</option>
+            <option value="5">Docente de 5.º Grado</option>
+            <option value="6">Docente de 6.º Grado</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-purple" id="btn-main-auth" style="width: 100%;">¡Vamos a jugar! 🎮</button>
+      </form>
+
       <br>
       <button class="btn btn-outline" style="font-size:0.85rem;" onclick="toggleRegisterMode()" id="btn-toggle-reg">¿No tienes cuenta? Regístrate aquí</button>
-      <br>
-      <button class="btn btn-outline" style="font-size:0.85rem; margin-top:10px;" onclick="accesoProfesora()">👩‍🏫 Panel de la Profesora</button>
     </div>
 
     <!-- MENÚ PRINCIPAL DEL ALUMNO -->
@@ -375,7 +465,6 @@
       
       <div class="subjects-menu" id="subjects-container"></div>
 
-      <!-- BOTÓN DICCIONARIO / LEYENDO APRENDO -->
       <a class="btn btn-peach" style="width: 100%; justify-content: center;" href="https://66d8a84bda320.site123.me/" target="_blank">📖 Abrir Leyendo Aprendo (Diccionario)</a>
       <button class="btn btn-blue" style="width: 100%; justify-content: center;" onclick="openReadingsSection()">📚 Sección de Lectura</button>
       <button class="btn btn-outline" style="font-size:0.85rem; margin-top:10px;" onclick="logout()">🚪 Cerrar Sesión</button>
@@ -385,11 +474,7 @@
     <div id="screen-readings" class="screen">
       <h2>📚 Biblioteca y Lecturas</h2>
       <p>Cuentos y lecturas recomendadas por tus profesoras:</p>
-      
-      <div id="readings-container" style="width: 100%;">
-        <!-- Lecturas dinámicas -->
-      </div>
-
+      <div id="readings-container" style="width: 100%;"></div>
       <button class="btn btn-outline" onclick="exitToMenu()">⬅️ Volver al Menú</button>
     </div>
 
@@ -398,49 +483,60 @@
       <div style="font-family:'Fredoka One'; color:var(--text-dark); margin-bottom:5px;" id="round-indicator">Pregunta 1</div>
       <div class="progress-bar-container"><div class="progress-bar" id="game-progress"></div></div>
       
-      <div class="question-box" id="question-text">
-        Cargando pregunta...
-      </div>
-
+      <div class="question-box" id="question-text">Cargando pregunta...</div>
       <div class="options-grid" id="options-container"></div>
       <button class="btn btn-outline" onclick="exitToMenu()">🏠 Menú Principal</button>
     </div>
 
-    <!-- PANEL DE LA PROFESORA -->
+    <!-- PANEL EXCLUSIVO PARA LA PROFESORA -->
     <div id="screen-teacher" class="screen">
-      <h2>👩‍🏫 Panel Docente de Evaluación</h2>
-      <p>Gestiona los estudiantes y actividades de tu salón:</p>
+      <h2 id="teacher-panel-title">👩‍🏫 Panel Docente de Evaluación</h2>
+      <p id="teacher-panel-subtitle">Gestiona los estudiantes y actividades de tu salón:</p>
 
-      <div style="width: 100%; max-width: 320px; margin-bottom: 15px;">
-        <label for="teacher-grade-select" style="font-weight: 700; font-size: 0.9rem;">Seleccionar Grado Docente:</label>
-        <select id="teacher-grade-select" onchange="cargarTablaProfesora()">
-          <option value="1">1.º Grado de Primaria</option>
-          <option value="2">2.º Grado de Primaria</option>
-          <option value="3">3.º Grado de Primaria</option>
-          <option value="4">4.º Grado de Primaria</option>
-          <option value="5">5.º Grado de Primaria</option>
-          <option value="6">6.º Grado de Primaria</option>
-        </select>
+      <!-- Pestañas internas del Panel Docente -->
+      <div class="tab-switch">
+        <button class="tab-btn active" id="tab-evals" onclick="switchTeacherTab('evals')">📊 Calificaciones</button>
+        <button class="tab-btn" id="tab-students-list" onclick="switchTeacherTab('students')">👥 Alumnos Registrados</button>
       </div>
 
-      <div style="width: 100%; overflow-x: auto; margin-bottom: 15px;">
-        <table class="teacher-table">
-          <thead>
-            <tr>
-              <th>Alumno</th>
-              <th>Materia</th>
-              <th>Aciertos</th>
-              <th>Fallos</th>
-            </tr>
-          </thead>
-          <tbody id="teacher-table-body">
-            <!-- Carga desde Firestore -->
-          </tbody>
-        </table>
+      <!-- SECCIÓN 1: TABLA DE EVALUACIONES -->
+      <div id="section-evaluations" style="width: 100%;">
+        <div style="width: 100%; overflow-x: auto; margin-bottom: 15px;">
+          <table class="teacher-table">
+            <thead>
+              <tr>
+                <th>Alumno</th>
+                <th>Materia</th>
+                <th>Aciertos</th>
+                <th>Fallos</th>
+                <th>Estatus</th>
+              </tr>
+            </thead>
+            <tbody id="teacher-table-body"></tbody>
+          </table>
+        </div>
       </div>
 
-      <button class="btn btn-green" onclick="toggleActivityCreator()">➕ Crear Nueva Pregunta / Actividad</button>
+      <!-- SECCIÓN 2: LISTA DE ALUMNOS REGISTRADOS -->
+      <div id="section-registered-students" style="width: 100%; display: none;">
+        <div style="width: 100%; overflow-x: auto; margin-bottom: 15px;">
+          <table class="teacher-table">
+            <thead>
+              <tr>
+                <th>Avatar</th>
+                <th>Nombre del Alumno</th>
+                <th>Correo Registrado</th>
+                <th>Estatus</th>
+              </tr>
+            </thead>
+            <tbody id="registered-students-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <button class="btn btn-green" onclick="toggleActivityCreator()">➕ Crear Nueva Pregunta</button>
       <button class="btn btn-purple" onclick="toggleReadingCreator()">📖 Agregar Nueva Lectura</button>
+      <button class="btn btn-blue" onclick="toggleContentManager()">⚙️ Modificar / Eliminar Preguntas y Lecturas</button>
 
       <!-- CREADOR DE ACTIVIDADES -->
       <div id="activity-creator-box" style="display:none; background:#F8F9FA; border:2px solid #E2D9F3; border-radius:18px; padding:15px; margin-top:15px; width:100%;">
@@ -456,27 +552,53 @@
           <option value="Proyecto">Proyecto</option>
           <option value="Inglés">Inglés</option>
         </select>
-        <button class="btn btn-purple" onclick="saveCustomActivity()">💾 Guardar Pregunta en la Nube</button>
+        <button class="btn btn-purple" onclick="saveCustomActivity()">💾 Guardar Pregunta</button>
       </div>
 
       <!-- CREADOR DE LECTURAS -->
       <div id="reading-creator-box" style="display:none; background:#F8F9FA; border:2px solid #E2D9F3; border-radius:18px; padding:15px; margin-top:15px; width:100%;">
         <h3>Añadir Lectura o Libro</h3>
         <input type="text" id="new-reading-title" class="input-field" placeholder="Título del libro o lectura">
-        <textarea id="new-reading-content" class="input-field" placeholder="Escribe el texto de la lectura o pega el enlace al libro PDF" style="height: 100px;"></textarea>
+        <textarea id="new-reading-content" class="input-field" placeholder="Escribe el texto de la lectura o enlace" style="height: 100px;"></textarea>
         <button class="btn btn-purple" onclick="saveCustomReading()">💾 Publicar Lectura</button>
       </div>
 
+      <!-- GESTOR DE PREGUNTAS Y LECTURAS CREADAS -->
+      <div id="content-manager-box" style="display:none; background:#F8F9FA; border:2px solid #E2D9F3; border-radius:18px; padding:15px; margin-top:15px; width:100%;">
+        <h3>⚙️ Mis Preguntas Publicadas</h3>
+        <div id="managed-questions-list" style="margin-bottom: 15px;">Cargando...</div>
+        
+        <h3>⚙️ Mis Lecturas Publicadas</h3>
+        <div id="managed-readings-list">Cargando...</div>
+      </div>
+
       <br>
-      <button class="btn btn-outline" onclick="goToScreen('screen-profile')">⬅️ Salir del Panel</button>
+      <button class="btn btn-outline" onclick="logout()">🚪 Cerrar Sesión Docente</button>
     </div>
 
-    <!-- RESULTADOS -->
+    <!-- RESULTADOS Y VALIDACIÓN DE DIPLOMA -->
     <div id="screen-result" class="screen">
-      <div style="font-size: 3rem;" id="result-emoji">🎉</div>
+      <div style="font-size: 3.5rem;" id="result-emoji">🎉</div>
       <h2 id="result-title">¡Evaluación Completada!</h2>
       <p id="result-desc">Tus resultados han sido registrados para la profesora.</p>
+      <div id="diploma-action-area" style="width: 100%;"></div>
       <button class="btn btn-purple" onclick="exitToMenu()">🏠 Continuar</button>
+    </div>
+
+    <!-- DIPLOMA OFICIAL IMPRIMIBLE -->
+    <div id="screen-certificate" class="screen">
+      <div class="certificate-box">
+        <div style="font-size:2.8rem; margin-bottom:5px;">🎖️</div>
+        <h2 style="color:var(--text-dark); font-size:1.4rem; margin-bottom:2px;">DIPLOMA DE EXCELENCIA</h2>
+        <p id="cert-colegio" style="font-weight:bold; color:#7209B7; font-size:0.9rem; margin-bottom:8px;">E.B.E. "Ángel Emiro Bravo"</p>
+        <p style="font-size:0.85rem; margin-bottom:4px;">Otorgado orgullosamente al estudiante:</p>
+        <h3 id="cert-student-name" style="color:var(--text-dark); font-size:1.5rem; text-decoration:underline; margin-bottom:8px;">Nombre Alumno</h3>
+        <p style="font-size:0.85rem;" id="cert-details">Por aprobar exitosamente con la calificación requerida.</p>
+        <p style="font-size:0.75rem; color:#8D99AE; margin-top:12px;">⭐ ¡Excelente esfuerzo y superación escolar! ⭐</p>
+      </div>
+
+      <button class="btn btn-green" onclick="window.print()">🖨️ Imprimir Diploma</button>
+      <button class="btn btn-outline" onclick="exitToMenu()">⬅️ Volver al Menú</button>
     </div>
 
     <!-- FOOTER DE AUTORES -->
@@ -487,7 +609,7 @@
   </div>
 
   <script>
-    // CREDENCIALES CONFIGURADAS
+    // CREDENCIALES DE FIREBASE
     const firebaseConfig = {
       apiKey: "AIzaSyDF9_momXI_EK7elDtqdg2J93WfqjU2GFE",
       authDomain: "jugando-aprendo-befab.firebaseapp.com",
@@ -506,6 +628,7 @@
     const NOMBRE_COLEGIO = 'E.B.E. "Ángel Emiro Bravo"';
     document.getElementById('display-colegio').innerText = NOMBRE_COLEGIO;
 
+    let selectedRole = 'student';
     let isRegisterMode = false;
     let currentUserData = null;
 
@@ -521,23 +644,59 @@
       currentSubject: ""
     };
 
+    function switchUserRole(role) {
+      selectedRole = role;
+      document.getElementById('tab-student').classList.toggle('active', role === 'student');
+      document.getElementById('tab-teacher').classList.toggle('active', role === 'teacher');
+      
+      document.getElementById('role-subtitle').innerText = role === 'student' 
+        ? 'Ingresa con tu cuenta de alumno:' 
+        : 'Ingresa con tu cuenta docente:';
+
+      if (isRegisterMode) {
+        document.getElementById('extra-register-fields').style.display = role === 'student' ? 'block' : 'none';
+        document.getElementById('extra-teacher-fields').style.display = role === 'teacher' ? 'block' : 'none';
+      }
+    }
+
+    function switchTeacherTab(tab) {
+      document.getElementById('tab-evals').classList.toggle('active', tab === 'evals');
+      document.getElementById('tab-students-list').classList.toggle('active', tab === 'students');
+      
+      document.getElementById('section-evaluations').style.display = tab === 'evals' ? 'block' : 'none';
+      document.getElementById('section-registered-students').style.display = tab === 'students' ? 'block' : 'none';
+
+      if (tab === 'students' && currentUserData) {
+        cargarAlumnosRegistrados(currentUserData.grade);
+      }
+    }
+
     // ESCUCHAR ESTADO DE SESIÓN
     auth.onAuthStateChanged(user => {
       if (user) {
         db.collection("users").doc(user.uid).get().then(doc => {
           if (doc.exists) {
             currentUserData = doc.data();
-            currentStudent.name = currentUserData.name;
-            currentStudent.grade = currentUserData.grade;
-            currentStudent.avatar = currentUserData.avatar || "🚀";
             
-            document.getElementById('user-avatar-display').innerText = currentStudent.avatar;
-            document.getElementById('welcome-player-name').innerText = `¡Hola, ${currentStudent.name}!`;
-            document.getElementById('welcome-grade-text').innerText = `Alumno de ${currentStudent.grade}.º Grado`;
-            
-            renderSubjectsMenu();
-            updateHeader();
-            goToScreen('screen-welcome');
+            if (currentUserData.role === 'teacher') {
+              document.getElementById('teacher-panel-title').innerText = `👩‍🏫 Panel de la ${currentUserData.name}`;
+              document.getElementById('teacher-panel-subtitle').innerText = `Atendiendo: ${currentUserData.grade}.º Grado`;
+              cargarTablaProfesora(currentUserData.grade);
+              cargarAlumnosRegistrados(currentUserData.grade);
+              goToScreen('screen-teacher');
+            } else {
+              currentStudent.name = currentUserData.name;
+              currentStudent.grade = currentUserData.grade;
+              currentStudent.avatar = currentUserData.avatar || "🚀";
+              
+              document.getElementById('user-avatar-display').innerText = currentStudent.avatar;
+              document.getElementById('welcome-player-name').innerText = `¡Hola, ${currentStudent.name}!`;
+              document.getElementById('welcome-grade-text').innerText = `Alumno de ${currentStudent.grade}.º Grado`;
+              
+              renderSubjectsMenu();
+              updateHeader();
+              goToScreen('screen-welcome');
+            }
           }
         });
       } else {
@@ -547,16 +706,17 @@
 
     function toggleRegisterMode() {
       isRegisterMode = !isRegisterMode;
-      const extraFields = document.getElementById('extra-register-fields');
       const btnAuth = document.getElementById('btn-main-auth');
       const btnToggle = document.getElementById('btn-toggle-reg');
 
       if (isRegisterMode) {
-        extraFields.style.display = 'block';
-        btnAuth.innerText = "¡Crear Cuenta y Jugar! ✏️";
+        document.getElementById('extra-register-fields').style.display = selectedRole === 'student' ? 'block' : 'none';
+        document.getElementById('extra-teacher-fields').style.display = selectedRole === 'teacher' ? 'block' : 'none';
+        btnAuth.innerText = "¡Crear Cuenta y Comenzar! ✏️";
         btnToggle.innerText = "¿Ya tienes cuenta? Inicia Sesión";
       } else {
-        extraFields.style.display = 'none';
+        document.getElementById('extra-register-fields').style.display = 'none';
+        document.getElementById('extra-teacher-fields').style.display = 'none';
         btnAuth.innerText = "¡Vamos a jugar! 🎮";
         btnToggle.innerText = "¿No tienes cuenta? Regístrate aquí";
       }
@@ -571,33 +731,61 @@
     function handleAuth() {
       const email = document.getElementById('input-email').value.trim();
       const password = document.getElementById('input-password').value.trim();
+      const remember = document.getElementById('check-remember').checked;
 
       if (!email || !password) {
-        alert("Por favor ingresa tu correo y contraseña.");
+        alert("Ingresa tu correo y contraseña.");
         return;
       }
 
-      if (isRegisterMode) {
-        const nameInput = document.getElementById('input-nombre').value.trim();
-        const gradoSelect = document.getElementById('select-grado').value;
+      const persistenceType = remember 
+        ? firebase.auth.Auth.Persistence.LOCAL 
+        : firebase.auth.Auth.Persistence.SESSION;
 
-        if (nameInput.split(" ").filter(p => p.length > 0).length < 2) {
-          alert("Escribe tu Nombre y Apellido completo.");
-          return;
+      auth.setPersistence(persistenceType).then(() => {
+        if (isRegisterMode) {
+          if (selectedRole === 'student') {
+            const nameInput = document.getElementById('input-nombre').value.trim();
+            const gradoSelect = document.getElementById('select-grado').value;
+
+            if (nameInput.split(" ").filter(p => p.length > 0).length < 2) {
+              alert("Escribe tu Nombre y Apellido completo.");
+              return;
+            }
+
+            return auth.createUserWithEmailAndPassword(email, password).then(cred => {
+              return db.collection("users").doc(cred.user.uid).set({
+                name: nameInput,
+                email: email,
+                grade: gradoSelect,
+                avatar: currentStudent.avatar,
+                role: "student",
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            });
+
+          } else {
+            const teacherName = document.getElementById('input-teacher-nombre').value.trim();
+            const teacherGrade = document.getElementById('select-teacher-grado').value;
+
+            if (!teacherName) {
+              alert("Ingresa tu Nombre de Docente.");
+              return;
+            }
+
+            return auth.createUserWithEmailAndPassword(email, password).then(cred => {
+              return db.collection("users").doc(cred.user.uid).set({
+                name: teacherName,
+                email: email,
+                grade: teacherGrade,
+                role: "teacher"
+              });
+            });
+          }
+        } else {
+          return auth.signInWithEmailAndPassword(email, password);
         }
-
-        auth.createUserWithEmailAndPassword(email, password).then(cred => {
-          return db.collection("users").doc(cred.user.uid).set({
-            name: nameInput,
-            grade: gradoSelect,
-            avatar: currentStudent.avatar,
-            role: "student"
-          });
-        }).catch(err => alert("Error al registrarse: " + err.message));
-
-      } else {
-        auth.signInWithEmailAndPassword(email, password).catch(err => alert("Error al iniciar sesión: " + err.message));
-      }
+      }).catch(err => alert("Atención: " + err.message));
     }
 
     function logout() {
@@ -669,8 +857,10 @@
     function startSubject(materia) {
       currentStudent.currentSubject = materia;
       qIndex = 0;
+      currentStudent.correct = 0;
+      currentStudent.wrong = 0;
       
-      db.collection("custom_questions").where("subject", "==", materia).get().then(snapshot => {
+      db.collection("custom_questions").where("subject", "==", materia).where("grade", "==", currentStudent.grade).get().then(snapshot => {
         let customQs = [];
         snapshot.forEach(doc => {
           let d = doc.data();
@@ -720,9 +910,36 @@
         renderQuestion();
       } else {
         guardarProgresoProfesor();
-        goToScreen('screen-result');
-        confetti({ particleCount: 50 });
+        evaluarDiploma();
       }
+    }
+
+    function evaluarDiploma() {
+      const total = currentStudent.correct + currentStudent.wrong;
+      const porcentaje = total > 0 ? (currentStudent.correct / total) * 100 : 0;
+      const diplomaArea = document.getElementById('diploma-action-area');
+
+      if (porcentaje >= 70) {
+        document.getElementById('result-emoji').innerText = "🏆";
+        document.getElementById('result-title').innerText = "¡Felicidades, Aprobaste!";
+        document.getElementById('result-desc').innerText = `Puntaje: ${porcentaje.toFixed(0)}% de aciertos. ¡Te has ganado tu diploma!`;
+        diplomaArea.innerHTML = `<button class="btn btn-green" onclick="showDiploma()" style="width:100%;">📜 Ver y Descargar Mi Diploma</button>`;
+        confetti({ particleCount: 80, spread: 70 });
+      } else {
+        document.getElementById('result-emoji').innerText = "💪";
+        document.getElementById('result-title').innerText = "¡Buen Intento!";
+        document.getElementById('result-desc').innerText = `Obtuviste un ${porcentaje.toFixed(0)}%. Se requiere al menos 70% para el diploma. ¡Repasa la materia y vuelve a intentarlo!`;
+        diplomaArea.innerHTML = `<p style="color:#E63946; font-weight:700;">¡Sigue practicando para ganar tu diploma!</p>`;
+      }
+
+      goToScreen('screen-result');
+    }
+
+    function showDiploma() {
+      document.getElementById('cert-colegio').innerText = NOMBRE_COLEGIO;
+      document.getElementById('cert-student-name').innerText = currentStudent.name || "Estudiante";
+      document.getElementById('cert-details').innerText = `Por aprobar exitosamente la actividad de ${currentStudent.currentSubject} para ${currentStudent.grade}.º Grado de Primaria.`;
+      goToScreen('screen-certificate');
     }
 
     function guardarProgresoProfesor() {
@@ -732,6 +949,7 @@
         subject: currentStudent.currentSubject,
         correct: currentStudent.correct,
         wrong: currentStudent.wrong,
+        passed: (currentStudent.correct / (currentStudent.correct + currentStudent.wrong)) >= 0.7,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
     }
@@ -759,39 +977,57 @@
       });
     }
 
-    function accesoProfesora() {
-      const clave = prompt("Ingresa la clave de la profesora:");
-      if (clave === "2026" || clave === "1234") {
-        cargarTablaProfesora();
-        goToScreen('screen-teacher');
-      } else if (clave !== null) {
-        alert("Contraseña incorrecta.");
-      }
-    }
-
-    function cargarTablaProfesora() {
+    function cargarTablaProfesora(gradoDocente) {
       const tbody = document.getElementById('teacher-table-body');
-      const gradoSeleccionado = document.getElementById('teacher-grade-select').value;
-      tbody.innerHTML = "Cargando...";
+      tbody.innerHTML = "Cargando evaluaciones...";
 
-      db.collection("evaluations").where("grade", "==", gradoSeleccionado).get().then(snapshot => {
+      db.collection("evaluations").where("grade", "==", gradoDocente).get().then(snapshot => {
         tbody.innerHTML = "";
         if (snapshot.empty) {
-          tbody.innerHTML = `<tr><td colspan="4">No hay registros para ${gradoSeleccionado}.º Grado.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="5">No hay registros de evaluaciones para ${gradoDocente}.º Grado.</td></tr>`;
           return;
         }
         snapshot.forEach(doc => {
           let s = doc.data();
           const tr = document.createElement('tr');
+          const estatus = s.passed ? "✅ Aprobado" : "❌ Reintentar";
           tr.innerHTML = `
             <td><strong>${s.name}</strong></td>
             <td>${s.subject}</td>
             <td style="color:#52B788; font-weight:bold;">${s.correct}</td>
             <td style="color:#E63946; font-weight:bold;">${s.wrong}</td>
+            <td><strong>${estatus}</strong></td>
           `;
           tbody.appendChild(tr);
         });
       });
+    }
+
+    function cargarAlumnosRegistrados(gradoDocente) {
+      const tbody = document.getElementById('registered-students-table-body');
+      tbody.innerHTML = "Cargando lista de alumnos...";
+
+      db.collection("users")
+        .where("role", "==", "student")
+        .where("grade", "==", gradoDocente)
+        .get().then(snapshot => {
+          tbody.innerHTML = "";
+          if (snapshot.empty) {
+            tbody.innerHTML = `<tr><td colspan="4">No hay alumnos registrados aún en ${gradoDocente}.º Grado.</td></tr>`;
+            return;
+          }
+          snapshot.forEach(doc => {
+            let u = doc.data();
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td style="font-size:1.5rem;">${u.avatar || '🚀'}</td>
+              <td><strong>${u.name}</strong></td>
+              <td style="font-size:0.8rem; color:#6C757D;">${u.email || 'Sin correo'}</td>
+              <td><span style="background:#B7E4C7; color:#22223B; padding:3px 8px; border-radius:10px; font-weight:bold; font-size:0.75rem;">Inscrito</span></td>
+            `;
+            tbody.appendChild(tr);
+          });
+        });
     }
 
     function toggleActivityCreator() {
@@ -804,6 +1040,14 @@
       box.style.display = box.style.display === 'none' ? 'block' : 'none';
     }
 
+    function toggleContentManager() {
+      const box = document.getElementById('content-manager-box');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+      if (box.style.display === 'block') {
+        cargarPreguntasYLecturasDocente();
+      }
+    }
+
     function saveCustomActivity() {
       const q = document.getElementById('new-q-title').value.trim();
       const opt1 = document.getElementById('new-q-opt1').value.trim();
@@ -812,16 +1056,18 @@
       const subj = document.getElementById('new-q-subject').value;
 
       if (!q || !opt1 || !opt2 || !opt3) {
-        alert("Por favor completa todos los campos de la pregunta.");
+        alert("Por favor completa todos los campos.");
         return;
       }
 
       db.collection("custom_questions").add({
         q: q,
         a: [opt1, opt2, opt3],
-        subject: subj
+        subject: subj,
+        grade: currentUserData.grade,
+        author: currentUserData.name
       }).then(() => {
-        alert("¡Pregunta guardada en la nube con éxito!");
+        alert("¡Pregunta guardada con éxito!");
         toggleActivityCreator();
       });
     }
@@ -831,17 +1077,67 @@
       const content = document.getElementById('new-reading-content').value.trim();
 
       if (!title || !content) {
-        alert("Completa el título y contenido de la lectura.");
+        alert("Completa el título y contenido.");
         return;
       }
 
       db.collection("readings").add({
         title: title,
-        content: content
+        content: content,
+        grade: currentUserData.grade,
+        author: currentUserData.name
       }).then(() => {
         alert("¡Lectura publicada para los alumnos!");
         toggleReadingCreator();
       });
+    }
+
+    function cargarPreguntasYLecturasDocente() {
+      const qList = document.getElementById('managed-questions-list');
+      const rList = document.getElementById('managed-readings-list');
+
+      db.collection("custom_questions").where("grade", "==", currentUserData.grade).get().then(snapshot => {
+        qList.innerHTML = "";
+        if (snapshot.empty) {
+          qList.innerHTML = "<p style='font-size:0.85rem;'>No has creado preguntas aún.</p>";
+        } else {
+          snapshot.forEach(doc => {
+            let data = doc.data();
+            qList.innerHTML += `
+              <div class="managed-item">
+                <span><strong>[${data.subject}]</strong> ${data.q}</span>
+                <button class="btn btn-pink" style="padding:4px 10px; font-size:0.75rem;" onclick="eliminarDoc('custom_questions', '${doc.id}')">🗑️ Eliminar</button>
+              </div>
+            `;
+          });
+        }
+      });
+
+      db.collection("readings").where("grade", "==", currentUserData.grade).get().then(snapshot => {
+        rList.innerHTML = "";
+        if (snapshot.empty) {
+          rList.innerHTML = "<p style='font-size:0.85rem;'>No has subido lecturas aún.</p>";
+        } else {
+          snapshot.forEach(doc => {
+            let data = doc.data();
+            rList.innerHTML += `
+              <div class="managed-item">
+                <span>📖 ${data.title}</span>
+                <button class="btn btn-pink" style="padding:4px 10px; font-size:0.75rem;" onclick="eliminarDoc('readings', '${doc.id}')">🗑️ Eliminar</button>
+              </div>
+            `;
+          });
+        }
+      });
+    }
+
+    function eliminarDoc(coleccion, id) {
+      if (confirm("¿Estás segura de que deseas eliminar este contenido?")) {
+        db.collection(coleccion).doc(id).delete().then(() => {
+          alert("Contenido eliminado con éxito.");
+          cargarPreguntasYLecturasDocente();
+        });
+      }
     }
   </script>
 </body>
