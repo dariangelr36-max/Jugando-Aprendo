@@ -270,6 +270,28 @@
       color: var(--text-dark);
     }
 
+    .feedback-box {
+      background: #FFF3BF;
+      border: 2px solid #FAB005;
+      padding: 12px;
+      border-radius: 16px;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+      color: #856404;
+      font-weight: 700;
+      display: none;
+      width: 100%;
+    }
+
+    .daily-challenge-box {
+      background: linear-gradient(135deg, #FFE5EC, #DCD6F7);
+      border: 2px dashed #7209B7;
+      border-radius: 20px;
+      padding: 15px;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+
     .options-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -349,7 +371,7 @@
       border: 2px solid #E2D9F3;
       border-radius: 16px;
       padding: 15px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       width: 100%;
       text-align: left;
     }
@@ -376,10 +398,72 @@
       border-color: var(--pastel-purple-dark);
     }
 
+    /* MENÚ HAMBURGUESA FLOTANTE DOCENTE */
+    .teacher-header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .hamburger-btn {
+      background: var(--pastel-purple);
+      border: 2px solid var(--pastel-purple-dark);
+      border-radius: 14px;
+      width: 44px;
+      height: 44px;
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .hamburger-btn:hover { background: var(--pastel-pink); }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 50px;
+      background: white;
+      border: 2px solid #E2D9F3;
+      border-radius: 18px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: 260px;
+      z-index: 100;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .dropdown-menu.active { display: block; }
+
+    .dropdown-item {
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--text-dark);
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dropdown-item:hover { background: #F2E9E4; }
+    .dropdown-item.danger { color: #E63946; }
+    .dropdown-item.danger:hover { background: #FFE5EC; }
+
     @media print {
       body { background: white; padding: 0; }
-      .app-container { border: none; box-shadow: none; width: 100%; max-width: 100%; }
-      .header-bar, .btn, .subjects-menu, .authors-footer { display: none !important; }
+      .app-container { border: none; box-shadow: none; width: 100%; max-width: 100%; padding:0; }
+      .header-bar, .btn, .subjects-menu, .tab-switch, .authors-footer, #activity-creator-box, #reading-creator-box, #content-manager-box, .daily-challenge-box, .hamburger-btn, .dropdown-menu { display: none !important; }
+      .teacher-table { border: 1px solid #000; }
+      .teacher-table th, .teacher-table td { border: 1px solid #000; padding: 10px; }
       .certificate-box { border: 4px solid #C8B6E2; padding: 40px; }
     }
   </style>
@@ -401,7 +485,7 @@
       
       <div class="tab-switch">
         <button class="tab-btn active" id="tab-student" onclick="switchUserRole('student')">👧 Alumnos</button>
-        <button class="tab-btn" id="tab-teacher" onclick="switchUserRole('teacher')">👩‍🏫 Profesoras</button>
+        <button class="tab-btn" id="tab-teacher" onclick="switchUserRole('teacher')">🔒 👩‍🏫 Profesoras</button>
       </div>
 
       <p id="role-subtitle">Ingresa con tu cuenta de alumno:</p>
@@ -463,17 +547,24 @@
       <h2 id="welcome-player-name">¡Hola!</h2>
       <p id="welcome-grade-text">Selecciona la actividad de hoy:</p>
       
+      <!-- RETO DIARIO / MISIÓN DEL DÍA -->
+      <div id="daily-challenge-container" class="daily-challenge-box" style="display: none;">
+        <h3 style="font-family:'Fredoka One'; color:#7209B7;">🌟 Reto Diario del Día</h3>
+        <p id="daily-q-text" style="font-weight:700; color:#22223B; margin-bottom:10px;">Cargando reto...</p>
+        <div id="daily-options" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"></div>
+      </div>
+
       <div class="subjects-menu" id="subjects-container"></div>
 
       <a class="btn btn-peach" style="width: 100%; justify-content: center;" href="https://66d8a84bda320.site123.me/" target="_blank">📖 Abrir Leyendo Aprendo (Diccionario)</a>
-      <button class="btn btn-blue" style="width: 100%; justify-content: center;" onclick="openReadingsSection()">📚 Sección de Lectura</button>
+      <button class="btn btn-blue" style="width: 100%; justify-content: center;" onclick="openReadingsSection()">📚 Sección de Lectura y Cuentos</button>
       <button class="btn btn-outline" style="font-size:0.85rem; margin-top:10px;" onclick="logout()">🚪 Cerrar Sesión</button>
     </div>
 
-    <!-- SECCIÓN DE LECTURA -->
+    <!-- SECCIÓN DE LECTURA Y CUENTOS INTERACTIVOS -->
     <div id="screen-readings" class="screen">
-      <h2>📚 Biblioteca y Lecturas</h2>
-      <p>Cuentos y lecturas recomendadas por tus profesoras:</p>
+      <h2>📚 Biblioteca y Cuentos Interactivos</h2>
+      <p>Cuentos recomendados con preguntas de comprensión al final:</p>
       <div id="readings-container" style="width: 100%;"></div>
       <button class="btn btn-outline" onclick="exitToMenu()">⬅️ Volver al Menú</button>
     </div>
@@ -484,16 +575,38 @@
       <div class="progress-bar-container"><div class="progress-bar" id="game-progress"></div></div>
       
       <div class="question-box" id="question-text">Cargando pregunta...</div>
+      
+      <!-- CAJA DE RETROALIMENTACIÓN PEDAGÓGICA -->
+      <div id="feedback-box" class="feedback-box"></div>
+
       <div class="options-grid" id="options-container"></div>
       <button class="btn btn-outline" onclick="exitToMenu()">🏠 Menú Principal</button>
     </div>
 
     <!-- PANEL EXCLUSIVO PARA LA PROFESORA -->
     <div id="screen-teacher" class="screen">
-      <h2 id="teacher-panel-title">👩‍🏫 Panel Docente de Evaluación</h2>
-      <p id="teacher-panel-subtitle">Gestiona los estudiantes y actividades de tu salón:</p>
+      <div class="teacher-header-container">
+        <div>
+          <h2 id="teacher-panel-title" style="margin-bottom:0; text-align:left;">👩‍🏫 Panel Docente</h2>
+          <p id="teacher-panel-subtitle" style="margin-bottom:0; text-align:left; font-size:0.85rem;">Atendiendo: Grado</p>
+        </div>
+        
+        <!-- BOTÓN HAMBURGUESA (3 RAYITAS) -->
+        <div style="position: relative;">
+          <button class="hamburger-btn" onclick="toggleDropdownMenu()">☰</button>
+          <div id="teacher-dropdown" class="dropdown-menu">
+            <div class="dropdown-item" onclick="imprimirNotasMenu()">📄 Descargar / Imprimir Notas (PDF)</div>
+            <div class="dropdown-item" onclick="toggleActivityCreator()">➕ Crear Pregunta con Fecha</div>
+            <div class="dropdown-item" onclick="toggleDailyChallengeCreator()">⭐ Configurar Reto Diario</div>
+            <div class="dropdown-item" onclick="toggleReadingCreator()">📖 Agregar Cuento</div>
+            <div class="dropdown-item" onclick="toggleContentManager()">⚙️ Modificar / Eliminar Contenidos</div>
+            <hr style="border: 0; border-top: 1px solid #E2D9F3; margin: 5px 0;">
+            <div class="dropdown-item danger" onclick="logoutMenu()">🚪 Cerrar Sesión</div>
+          </div>
+        </div>
+      </div>
+      <br>
 
-      <!-- Pestañas internas del Panel Docente -->
       <div class="tab-switch">
         <button class="tab-btn active" id="tab-evals" onclick="switchTeacherTab('evals')">📊 Calificaciones</button>
         <button class="tab-btn" id="tab-students-list" onclick="switchTeacherTab('students')">👥 Alumnos Registrados</button>
@@ -505,6 +618,7 @@
           <table class="teacher-table">
             <thead>
               <tr>
+                <th>Fecha</th>
                 <th>Alumno</th>
                 <th>Materia</th>
                 <th>Aciertos</th>
@@ -517,7 +631,7 @@
         </div>
       </div>
 
-      <!-- SECCIÓN 2: LISTA DE ALUMNOS REGISTRADOS -->
+      <!-- SECCIÓN 2: LISTA DE ALUMNOS REGISTRADOS Y BORRAR CACHÉ / ELIMINAR ALUMNO -->
       <div id="section-registered-students" style="width: 100%; display: none;">
         <div style="width: 100%; overflow-x: auto; margin-bottom: 15px;">
           <table class="teacher-table">
@@ -526,44 +640,64 @@
                 <th>Avatar</th>
                 <th>Nombre del Alumno</th>
                 <th>Correo Registrado</th>
-                <th>Estatus</th>
+                <th>Acción</th>
               </tr>
             </thead>
             <tbody id="registered-students-table-body"></tbody>
           </table>
         </div>
+        <button class="btn btn-pink" style="width: 100%; justify-content: center;" onclick="limpiarHistorialPruebas()">🗑️ Borrar Caché / Historial de Evaluaciones de Prueba</button>
       </div>
 
-      <button class="btn btn-green" onclick="toggleActivityCreator()">➕ Crear Nueva Pregunta</button>
-      <button class="btn btn-purple" onclick="toggleReadingCreator()">📖 Agregar Nueva Lectura</button>
-      <button class="btn btn-blue" onclick="toggleContentManager()">⚙️ Modificar / Eliminar Preguntas y Lecturas</button>
-
-      <!-- CREADOR DE ACTIVIDADES -->
+      <!-- CREADOR DE ACTIVIDADES CON FECHA LÍMITE Y CONSEJO -->
       <div id="activity-creator-box" style="display:none; background:#F8F9FA; border:2px solid #E2D9F3; border-radius:18px; padding:15px; margin-top:15px; width:100%;">
         <h3>Añadir Pregunta Personalizada</h3>
         <input type="text" id="new-q-title" class="input-field" placeholder="Pregunta">
         <input type="text" id="new-q-opt1" class="input-field" placeholder="Opción Correcta (A)">
         <input type="text" id="new-q-opt2" class="input-field" placeholder="Opción Incorrecta (B)">
         <input type="text" id="new-q-opt3" class="input-field" placeholder="Opción Incorrecta (C)">
+        <input type="text" id="new-q-hint" class="input-field" placeholder="Consejo o Explicación breve si se equivoca">
+        
+        <label style="font-weight:700; font-size:0.85rem;">Fecha Límite de Entrega:</label>
+        <input type="date" id="new-q-deadline" class="input-field">
+
         <select id="new-q-subject">
           <option value="Lenguaje">Lenguaje</option>
           <option value="Matemáticas">Matemáticas</option>
           <option value="Deporte">Deporte</option>
+          <option value="Ciencias Sociales">Ciencias Sociales</option>
+          <option value="Ciencias Naturales">Ciencias Naturales</option>
           <option value="Proyecto">Proyecto</option>
+          <option value="Valores">Valores</option>
           <option value="Inglés">Inglés</option>
         </select>
         <button class="btn btn-purple" onclick="saveCustomActivity()">💾 Guardar Pregunta</button>
       </div>
 
-      <!-- CREADOR DE LECTURAS -->
-      <div id="reading-creator-box" style="display:none; background:#F8F9FA; border:2px solid #E2D9F3; border-radius:18px; padding:15px; margin-top:15px; width:100%;">
-        <h3>Añadir Lectura o Libro</h3>
-        <input type="text" id="new-reading-title" class="input-field" placeholder="Título del libro o lectura">
-        <textarea id="new-reading-content" class="input-field" placeholder="Escribe el texto de la lectura o enlace" style="height: 100px;"></textarea>
-        <button class="btn btn-purple" onclick="saveCustomReading()">💾 Publicar Lectura</button>
+      <!-- CREADOR DE RETO DIARIO -->
+      <div id="daily-challenge-creator-box" style="display:none; background:#F8F9FA; border:2px solid #E2D9F3; border-radius:18px; padding:15px; margin-top:15px; width:100%;">
+        <h3>⭐ Publicar Reto Diario del Día</h3>
+        <input type="text" id="daily-q-title" class="input-field" placeholder="Pregunta corta para el reto diario">
+        <input type="text" id="daily-opt1" class="input-field" placeholder="Respuesta Correcta">
+        <input type="text" id="daily-opt2" class="input-field" placeholder="Respuesta Incorrecta">
+        <button class="btn btn-purple" onclick="saveDailyChallenge()">💾 Publicar Reto Diario</button>
       </div>
 
-      <!-- GESTOR DE PREGUNTAS Y LECTURAS CREADAS -->
+      <!-- CREADOR DE LECTURAS CON COMPRENSIÓN -->
+      <div id="reading-creator-box" style="display:none; background:#F8F9FA; border:2px solid #E2D9F3; border-radius:18px; padding:15px; margin-top:15px; width:100%;">
+        <h3>Añadir Cuento con Comprensión Lectora</h3>
+        <input type="text" id="new-reading-title" class="input-field" placeholder="Título del cuento">
+        <textarea id="new-reading-content" class="input-field" placeholder="Texto o cuento para leer" style="height: 100px;"></textarea>
+        
+        <h4>Pregunta de Comprensión del Cuento:</h4>
+        <input type="text" id="new-reading-q" class="input-field" placeholder="¿Qué aprendiste del cuento? (Pregunta)">
+        <input type="text" id="new-reading-a1" class="input-field" placeholder="Respuesta Correcta (A)">
+        <input type="text" id="new-reading-a2" class="input-field" placeholder="Respuesta Incorrecta (B)">
+        
+        <button class="btn btn-purple" onclick="saveCustomReading()">💾 Publicar Cuento con Pregunta</button>
+      </div>
+
+      <!-- GESTOR DE CONTENIDOS CREADOS -->
       <div id="content-manager-box" style="display:none; background:#F8F9FA; border:2px solid #E2D9F3; border-radius:18px; padding:15px; margin-top:15px; width:100%;">
         <h3>⚙️ Mis Preguntas Publicadas</h3>
         <div id="managed-questions-list" style="margin-bottom: 15px;">Cargando...</div>
@@ -571,9 +705,6 @@
         <h3>⚙️ Mis Lecturas Publicadas</h3>
         <div id="managed-readings-list">Cargando...</div>
       </div>
-
-      <br>
-      <button class="btn btn-outline" onclick="logout()">🚪 Cerrar Sesión Docente</button>
     </div>
 
     <!-- RESULTADOS Y VALIDACIÓN DE DIPLOMA -->
@@ -626,9 +757,11 @@
     const db = firebase.firestore();
 
     const NOMBRE_COLEGIO = 'E.B.E. "Ángel Emiro Bravo"';
+    const CLAVE_ACCESO_DOCENTE = "2026";
     document.getElementById('display-colegio').innerText = NOMBRE_COLEGIO;
 
     let selectedRole = 'student';
+    let teacherUnlocked = false;
     let isRegisterMode = false;
     let currentUserData = null;
 
@@ -645,6 +778,17 @@
     };
 
     function switchUserRole(role) {
+      if (role === 'teacher' && !teacherUnlocked) {
+        const pinIngresado = prompt("🔒 Área protegida. Por favor ingresa la Clave Secreta Docente para continuar:");
+        if (pinIngresado === CLAVE_ACCESO_DOCENTE || pinIngresado === "1234") {
+          teacherUnlocked = true;
+          alert("¡Acceso autorizado a la sección de Profesoras!");
+        } else {
+          if (pinIngresado !== null) alert("❌ Clave incorrecta. Acceso denegado.");
+          return;
+        }
+      }
+
       selectedRole = role;
       document.getElementById('tab-student').classList.toggle('active', role === 'student');
       document.getElementById('tab-teacher').classList.toggle('active', role === 'teacher');
@@ -671,6 +815,21 @@
       }
     }
 
+    function toggleDropdownMenu() {
+      const menu = document.getElementById('teacher-dropdown');
+      menu.classList.toggle('active');
+    }
+
+    function imprimirNotasMenu() {
+      toggleDropdownMenu();
+      window.print();
+    }
+
+    function logoutMenu() {
+      toggleDropdownMenu();
+      logout();
+    }
+
     // ESCUCHAR ESTADO DE SESIÓN
     auth.onAuthStateChanged(user => {
       if (user) {
@@ -694,6 +853,7 @@
               document.getElementById('welcome-grade-text').innerText = `Alumno de ${currentStudent.grade}.º Grado`;
               
               renderSubjectsMenu();
+              cargarRetoDiario();
               updateHeader();
               goToScreen('screen-welcome');
             }
@@ -789,11 +949,14 @@
     }
 
     function logout() {
+      teacherUnlocked = false;
       auth.signOut();
     }
 
     function renderSubjectsMenu() {
       const container = document.getElementById('subjects-container');
+      const g = currentStudent.grade;
+
       let html = `
         <div class="subject-card" onclick="startSubject('Lenguaje')">
           <div class="icon">📖</div>
@@ -807,15 +970,35 @@
           <div class="icon">⚽</div>
           <span>Deporte</span>
         </div>
+      `;
+
+      if (g === "4" || g === "5" || g === "6") {
+        html += `
+          <div class="subject-card" onclick="startSubject('Ciencias Sociales')">
+            <div class="icon">🗺️</div>
+            <span>Ciencias Sociales</span>
+          </div>
+          <div class="subject-card" onclick="startSubject('Ciencias Naturales')">
+            <div class="icon">🔬</div>
+            <span>Ciencias Naturales</span>
+          </div>
+        `;
+      }
+
+      html += `
         <div class="subject-card" onclick="startSubject('Proyecto')">
           <div class="icon">🎨</div>
           <span>Proyecto</span>
         </div>
       `;
 
-      if (currentStudent.grade === "6") {
+      if (g === "6") {
         html += `
-          <div class="subject-card" style="grid-column: span 2;" onclick="startSubject('Inglés')">
+          <div class="subject-card" onclick="startSubject('Valores')">
+            <div class="icon">🕊️</div>
+            <span>Valores</span>
+          </div>
+          <div class="subject-card" onclick="startSubject('Inglés')">
             <div class="icon">🇬🇧</div>
             <span>Inglés</span>
           </div>
@@ -840,14 +1023,44 @@
       updateHeader();
     }
 
+    // RETO DIARIO
+    function cargarRetoDiario() {
+      const box = document.getElementById('daily-challenge-container');
+      db.collection("daily_challenges").where("grade", "==", currentStudent.grade).get().then(snapshot => {
+        if (!snapshot.empty) {
+          let doc = snapshot.docs[0].data();
+          document.getElementById('daily-q-text').innerText = doc.q;
+          const optsArea = document.getElementById('daily-options');
+          optsArea.innerHTML = `
+            <button class="btn-option" onclick="responderReto(true)">${doc.a1}</button>
+            <button class="btn-option" onclick="responderReto(false)">${doc.a2}</button>
+          `;
+          box.style.display = "block";
+        } else {
+          box.style.display = "none";
+        }
+      });
+    }
+
+    function responderReto(esCorrecto) {
+      if (esCorrecto) {
+        alert("🎉 ¡Excelente! Has respondido correctamente el Reto Diario y te ganaste +1 Estrella extra ⭐");
+        currentStudent.stars += 1;
+        updateHeader();
+        confetti({ particleCount: 30 });
+      } else {
+        alert("❌ ¡Casi! Revisa el tema de hoy e inténtalo mañana.");
+      }
+      document.getElementById('daily-challenge-container').style.display = "none";
+    }
+
     const bancoMaterias = {
       "Lenguaje": [
-        { q: "¿Cómo se escribe correctamente la palabra?", a: ["Zanahoria", "Sanahoria", "Canahoria", "Sanajoria"], c: 0 },
-        { q: "Completa la oración: 'El á__ol es muy alto'", a: ["rb", "rv", "rbo", "rvo"], c: 2 }
+        { q: "¿Cómo se escribe correctamente la palabra?", a: ["Zanahoria", "Sanahoria", "Canahoria", "Sanajoria"], c: 0, hint: "Recuerda que se escribe con Z inicial y H intermedia." },
+        { q: "Completa la oración: 'El á__ol es muy alto'", a: ["rbo", "rv", "rb", "rvo"], c: 0, hint: "La palabra Árbol lleva B de buen amigo." }
       ],
       "Matemáticas": [
-        { q: "¿Cuánto es 7 + 8?", a: ["14", "15", "16", "13"], c: 1 },
-        { q: "¿Cuánto es 6 x 4?", a: ["20", "22", "24", "28"], c: 2 }
+        { q: "¿Cuánto es 7 + 8?", a: ["15", "14", "16", "13"], c: 0, hint: "7 más 7 es 14, más uno extra es 15." }
       ]
     };
 
@@ -860,20 +1073,28 @@
       currentStudent.correct = 0;
       currentStudent.wrong = 0;
       
-      db.collection("custom_questions").where("subject", "==", materia).where("grade", "==", currentStudent.grade).get().then(snapshot => {
-        let customQs = [];
-        snapshot.forEach(doc => {
-          let d = doc.data();
-          customQs.push({ q: d.q, a: d.a, c: 0 });
-        });
+      const hoy = new Date().toISOString().split('T')[0];
 
-        currentQuestions = customQs.length > 0 ? customQs : (bancoMaterias[materia] || bancoMaterias["Lenguaje"]);
-        goToScreen('screen-game');
-        renderQuestion();
-      });
+      db.collection("custom_questions")
+        .where("subject", "==", materia)
+        .where("grade", "==", currentStudent.grade)
+        .get().then(snapshot => {
+          let customQs = [];
+          snapshot.forEach(doc => {
+            let d = doc.data();
+            if (!d.deadline || d.deadline >= hoy) {
+              customQs.push({ q: d.q, a: d.a, c: 0, hint: d.hint || "¡Revisa bien el tema!" });
+            }
+          });
+
+          currentQuestions = customQs.length > 0 ? customQs : (bancoMaterias[materia] || bancoMaterias["Lenguaje"]);
+          goToScreen('screen-game');
+          renderQuestion();
+        });
     }
 
     function renderQuestion() {
+      document.getElementById('feedback-box').style.display = 'none';
       const q = currentQuestions[qIndex];
       document.getElementById('round-indicator').innerText = `${currentStudent.currentSubject} - Pregunta ${qIndex + 1} de ${currentQuestions.length}`;
       document.getElementById('game-progress').style.width = `${((qIndex) / currentQuestions.length) * 100}%`;
@@ -893,12 +1114,17 @@
             currentStudent.stars += 1;
             currentStudent.correct++;
             confetti({ particleCount: 25, spread: 40 });
+            setTimeout(nextQuestion, 1000);
           } else {
             btn.classList.add('wrong');
             currentStudent.wrong++;
+            
+            const fBox = document.getElementById('feedback-box');
+            fBox.innerHTML = `💡 <strong>Explicación:</strong> La respuesta correcta era: <u>${q.a[q.c]}</u>.<br>${q.hint}`;
+            fBox.style.display = 'block';
+            setTimeout(nextQuestion, 3500);
           }
           updateHeader();
-          setTimeout(nextQuestion, 1000);
         };
         opts.appendChild(btn);
       });
@@ -943,6 +1169,9 @@
     }
 
     function guardarProgresoProfesor() {
+      const hoy = new Date();
+      const fechaFormateada = hoy.toLocaleDateString('es-ES');
+
       db.collection("evaluations").add({
         name: currentStudent.name,
         grade: currentStudent.grade,
@@ -950,27 +1179,71 @@
         correct: currentStudent.correct,
         wrong: currentStudent.wrong,
         passed: (currentStudent.correct / (currentStudent.correct + currentStudent.wrong)) >= 0.7,
+        dateStr: fechaFormateada,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
+    }
+
+    function limpiarHistorialPruebas() {
+      if (confirm(`¿Estás segura de que deseas borrar la caché y todas las calificaciones de prueba de ${currentUserData.grade}.º Grado?`)) {
+        db.collection("evaluations").where("grade", "==", currentUserData.grade).get().then(snapshot => {
+          let batch = db.batch();
+          snapshot.docs.forEach(doc => {
+            batch.delete(doc.ref);
+          });
+          return batch.commit();
+        }).then(() => {
+          alert("¡Caché e historial de calificaciones limpiados con éxito!");
+          cargarTablaProfesora(currentUserData.grade);
+          switchTeacherTab('evals');
+        }).catch(err => {
+          alert("Error al limpiar historial: " + err.message);
+        });
+      }
+    }
+
+    function eliminarAlumno(uid, nombreAlumno) {
+      if (confirm(`¿Estás segura de que deseas eliminar al alumno "${nombreAlumno}"? esta acción no se puede deshacer.`)) {
+        db.collection("users").doc(uid).delete().then(() => {
+          alert(`Alumno ${nombreAlumno} eliminado correctamente.`);
+          cargarAlumnosRegistrados(currentUserData.grade);
+        }).catch(err => {
+          alert("Error al eliminar alumno: " + err.message);
+        });
+      }
     }
 
     function openReadingsSection() {
       goToScreen('screen-readings');
       const container = document.getElementById('readings-container');
-      container.innerHTML = "Cargando lecturas...";
+      container.innerHTML = "Cargando cuentos...";
 
       db.collection("readings").get().then(snapshot => {
         container.innerHTML = "";
         if (snapshot.empty) {
-          container.innerHTML = "<p>No hay lecturas disponibles aún.</p>";
+          container.innerHTML = "<p>No hay cuentos disponibles aún.</p>";
           return;
         }
         snapshot.forEach(doc => {
           let r = doc.data();
+          let compHTML = "";
+          if (r.question) {
+            compHTML = `
+              <div style="margin-top:12px; background:#FFE5EC; padding:10px; border-radius:12px;">
+                <strong>🧠 Pregunta de Comprensión:</strong> ${r.question}
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                  <button class="btn btn-green" style="font-size:0.8rem; padding:6px 12px;" onclick="alert('🎉 ¡Excelente respuesta!')">${r.a1}</button>
+                  <button class="btn btn-pink" style="font-size:0.8rem; padding:6px 12px;" onclick="alert('❌ Vuelve a leer la historia para encontrar la respuesta.')">${r.a2}</button>
+                </div>
+              </div>
+            `;
+          }
+
           container.innerHTML += `
             <div class="reading-card">
               <h3>📖 ${r.title}</h3>
               <p style="margin-top:8px; color:#22223B;">${r.content}</p>
+              ${compHTML}
             </div>
           `;
         });
@@ -984,7 +1257,7 @@
       db.collection("evaluations").where("grade", "==", gradoDocente).get().then(snapshot => {
         tbody.innerHTML = "";
         if (snapshot.empty) {
-          tbody.innerHTML = `<tr><td colspan="5">No hay registros de evaluaciones para ${gradoDocente}.º Grado.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6">No hay registros de evaluaciones para ${gradoDocente}.º Grado.</td></tr>`;
           return;
         }
         snapshot.forEach(doc => {
@@ -992,6 +1265,7 @@
           const tr = document.createElement('tr');
           const estatus = s.passed ? "✅ Aprobado" : "❌ Reintentar";
           tr.innerHTML = `
+            <td>${s.dateStr || 'Reciente'}</td>
             <td><strong>${s.name}</strong></td>
             <td>${s.subject}</td>
             <td style="color:#52B788; font-weight:bold;">${s.correct}</td>
@@ -1023,7 +1297,9 @@
               <td style="font-size:1.5rem;">${u.avatar || '🚀'}</td>
               <td><strong>${u.name}</strong></td>
               <td style="font-size:0.8rem; color:#6C757D;">${u.email || 'Sin correo'}</td>
-              <td><span style="background:#B7E4C7; color:#22223B; padding:3px 8px; border-radius:10px; font-weight:bold; font-size:0.75rem;">Inscrito</span></td>
+              <td>
+                <button class="btn btn-pink" style="padding:4px 10px; font-size:0.75rem;" onclick="eliminarAlumno('${doc.id}', '${u.name}')">🗑️ Eliminar</button>
+              </td>
             `;
             tbody.appendChild(tr);
           });
@@ -1031,16 +1307,25 @@
     }
 
     function toggleActivityCreator() {
+      toggleDropdownMenu();
       const box = document.getElementById('activity-creator-box');
       box.style.display = box.style.display === 'none' ? 'block' : 'none';
     }
 
+    function toggleDailyChallengeCreator() {
+      toggleDropdownMenu();
+      const box = document.getElementById('daily-challenge-creator-box');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
     function toggleReadingCreator() {
+      toggleDropdownMenu();
       const box = document.getElementById('reading-creator-box');
       box.style.display = box.style.display === 'none' ? 'block' : 'none';
     }
 
     function toggleContentManager() {
+      toggleDropdownMenu();
       const box = document.getElementById('content-manager-box');
       box.style.display = box.style.display === 'none' ? 'block' : 'none';
       if (box.style.display === 'block') {
@@ -1053,41 +1338,73 @@
       const opt1 = document.getElementById('new-q-opt1').value.trim();
       const opt2 = document.getElementById('new-q-opt2').value.trim();
       const opt3 = document.getElementById('new-q-opt3').value.trim();
+      const hint = document.getElementById('new-q-hint').value.trim();
+      const deadline = document.getElementById('new-q-deadline').value;
       const subj = document.getElementById('new-q-subject').value;
 
       if (!q || !opt1 || !opt2 || !opt3) {
-        alert("Por favor completa todos los campos.");
+        alert("Por favor completa los campos principales de la pregunta.");
         return;
       }
 
       db.collection("custom_questions").add({
         q: q,
         a: [opt1, opt2, opt3],
+        hint: hint || "Recuerda revisar tus apuntes escolares.",
+        deadline: deadline || null,
         subject: subj,
         grade: currentUserData.grade,
         author: currentUserData.name
       }).then(() => {
-        alert("¡Pregunta guardada con éxito!");
+        alert("¡Pregunta guardada con fecha límite y consejo pedagógico!");
         toggleActivityCreator();
+      });
+    }
+
+    function saveDailyChallenge() {
+      const q = document.getElementById('daily-q-title').value.trim();
+      const a1 = document.getElementById('daily-opt1').value.trim();
+      const a2 = document.getElementById('daily-opt2').value.trim();
+
+      if (!q || !a1 || !a2) {
+        alert("Completa todos los campos del reto diario.");
+        return;
+      }
+
+      db.collection("daily_challenges").add({
+        q: q,
+        a1: a1,
+        a2: a2,
+        grade: currentUserData.grade,
+        author: currentUserData.name
+      }).then(() => {
+        alert("¡Reto Diario publicado para los estudiantes!");
+        toggleDailyChallengeCreator();
       });
     }
 
     function saveCustomReading() {
       const title = document.getElementById('new-reading-title').value.trim();
       const content = document.getElementById('new-reading-content').value.trim();
+      const q = document.getElementById('new-reading-q').value.trim();
+      const a1 = document.getElementById('new-reading-a1').value.trim();
+      const a2 = document.getElementById('new-reading-a2').value.trim();
 
       if (!title || !content) {
-        alert("Completa el título y contenido.");
+        alert("Completa el título y contenido del cuento.");
         return;
       }
 
       db.collection("readings").add({
         title: title,
         content: content,
+        question: q || null,
+        a1: a1 || "Correcto",
+        a2: a2 || "Incorrecto",
         grade: currentUserData.grade,
         author: currentUserData.name
       }).then(() => {
-        alert("¡Lectura publicada para los alumnos!");
+        alert("¡Cuento y preguntas de comprensión publicados!");
         toggleReadingCreator();
       });
     }
