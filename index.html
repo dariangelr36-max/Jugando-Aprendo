@@ -181,6 +181,16 @@
       cursor: pointer;
     }
 
+    .forgot-password-link {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #7209B7;
+      cursor: pointer;
+      margin-bottom: 12px;
+      display: inline-block;
+      text-decoration: underline;
+    }
+
     .avatar-picker {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -531,6 +541,8 @@
           <input type="checkbox" id="check-remember" checked>
           <span>Recordar mi cuenta en este dispositivo</span>
         </label>
+
+        <span class="forgot-password-link" onclick="recuperarContrasena()">¿Olvidaste tu contraseña?</span>
 
         <div id="extra-register-fields" style="display: none; width: 100%;">
           <input type="text" id="input-nombre" class="input-field" placeholder="Nombre y Apellido Completo">
@@ -998,6 +1010,25 @@
     function logoutMenu() {
       toggleDropdownMenu();
       logout();
+    }
+
+    function recuperarContrasena() {
+      const emailInput = document.getElementById('input-email').value.trim();
+      
+      let emailTarget = emailInput;
+      if (!emailTarget) {
+        emailTarget = prompt("Escribe tu correo electrónico (Gmail) para enviarte las instrucciones de recuperación:");
+      }
+
+      if (emailTarget) {
+        auth.sendPasswordResetEmail(emailTarget).then(() => {
+          alert(`📧 ¡Listo! Se ha enviado un correo a "${emailTarget}" con las instrucciones para restablecer tu contraseña. Revisa tu bandeja de entrada o Spam.`);
+        }).catch(error => {
+          alert("Error al enviar el correo de recuperación: " + error.message);
+        });
+      } else {
+        alert("Debes proporcionar un correo electrónico válido.");
+      }
     }
 
     // ESCUCHAR ESTADO DE SESIÓN
